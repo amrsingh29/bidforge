@@ -1,0 +1,16 @@
+# Roles on a bid. People are named per deal in bid.yaml (team:), so every RFP can have a different team.
+# Turn a role off with `enabled: false`; add one as a new key.
+
+roles:
+  sales:                {label: Account Executive / Sales}
+  bid_manager:          {label: Bid / Proposal Manager}
+  presales:             {label: Presales Lead}
+  solution_consultant:  {label: Solution Consultant}
+  product_management:   {label: Product Management}
+  security:             {label: Security / InfoSec}
+  legal:                {label: Legal / Contracts}
+  deal_desk:            {label: Deal Desk / Pricing / Finance}
+  professional_services: {label: Professional Services}
+  partner:              {label: Partner / SI, external: true}
+  customer_success:     {label: Customer Success / Support}
+  marketing:            {label: Marketing}

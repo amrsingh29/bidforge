@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Deals are customer content (RFP packs are usually under NDA): local only
+deals/
+
+# Local settings
+*.local.json
+
+# Python
+.venv/
+__pycache__/
+
+# Test-set definitions point at real customer files: local only
+tests/set/

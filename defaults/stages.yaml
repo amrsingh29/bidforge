@@ -1,0 +1,59 @@
+# The shipped method: the 7 stages from "RFP Analysis Instructions — BMC Helix Presales (Staged Workflow)".
+# Change any of this in your personal profile (~/.bidforge/profile/*.yaml) or a deal's bid.yaml
+# (under `overrides:`), never here: upgrades replace this file.
+#
+#   gate: hard  -> /bid always stops here for your decision or check
+#   gate: soft  -> /bid chains through; the review goes on the "review when ready" list
+#   enabled: false turns a stage off. A new stage is a new key with `after: <stage id>`.
+
+stages:
+  stage1:
+    name: Inventory & understanding
+    order: 1
+    gate: hard
+    gate_check: Extraction spot-check; all documents read; dates and submission rules correct
+  stage2:
+    name: Qualification (bid / no-bid)
+    order: 2
+    gate: hard
+    gate_check: Bid decision agreed with the Account Executive
+  stage3:
+    name: Scope & requirements
+    order: 3
+    gate: soft
+    gate_check: Requirement count complete (spot-checked); first-pass compliance levels reasonable
+  stage4:
+    name: Solution & licensing
+    order: 4
+    gate: soft
+    gate_check: Solution scope agreed; Deal Desk and Product Management questions sent
+  stage5:
+    name: Security, compliance & legal
+    order: 5
+    gate: soft
+    gate_check: Security and Legal items handed over with deadlines
+  stage6:
+    name: Roles, risks & clarifications
+    order: 6
+    gate: hard
+    gate_check: Clarification questions approved before the buyer's deadline; every RACI row has an owner
+  stage7:
+    name: Win strategy, plan & handoff
+    order: 7
+    gate: soft
+    gate_check: Every task has an owner and a date
+
+modes:
+  next:
+    description: The next step, up to the next hard gate
+  step:
+    description: One stage at a time, stopping after each
+    all_gates: hard
+  quick_look:
+    description: Stages 1-2 only
+    stages: [stage1, stage2]
+  fast_track:
+    description: For a close clarification deadline
+    stages: [stage1, stage2, stage3, stage6]
+    notes: Stage 2 runs only 2.3 (mandatory and disqualifying) plus a quick bid view; Stage 3 at speed;
+      Stage 6 only 6.4 (clarification questions)

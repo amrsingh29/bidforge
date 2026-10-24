@@ -7,15 +7,15 @@
 import json
 
 from core.config.layers import ordered_stages
+from core.store import files
 
 
 def load(deal):
-    p = deal.path / "data" / "state.json"
-    return json.loads(p.read_text()) if p.exists() else {"stages": {}}
+    return files.read(deal.path / "data" / "state.json", {"stages": {}})
 
 
 def save(deal, state):
-    (deal.path / "data" / "state.json").write_text(json.dumps(state, indent=2) + "\n")
+    files.write(deal.path / "data" / "state.json", state)
 
 
 def stage_status(state, sid):
@@ -26,8 +26,11 @@ def stage_status(state, sid):
 
 
 def next_step(deal, config):
-    """(kind, stage id, stage) with kind "run" | "gate" | "finished"."""
+    """(kind, stage id, stage) with kind "run" | "gate" | "finished" | "stopped" (agreed No-bid)."""
     state = load(deal)
+    s2 = state.get("stages", {}).get("stage2", {})
+    if s2.get("gate_passed") and s2.get("recommendation") == "No-bid":
+        return "stopped", None, None
     for sid, stage in ordered_stages(config):
         st = stage_status(state, sid)
         if st == "not started":
@@ -38,10 +41,10 @@ def next_step(deal, config):
 
 
 def registers(deal):
-    """Open Unknown (U-xx) and Confirm (C-xx) items. Stages fill data/registers.json from Phase 2."""
+    """Counts of open Unknown (U-xx) and Confirm (C-xx) items."""
     p = deal.path / "data" / "registers.json"
     items = json.loads(p.read_text()).get("items", []) if p.exists() else []
-    open_ = [i for i in items if i.get("status") != "closed"]
+    open_ = [i for i in items if i.get("status") == "open"]
     return {"U": sum(i["id"].startswith("U-") for i in open_), "C": sum(i["id"].startswith("C-") for i in open_)}
 
 

@@ -26,9 +26,78 @@ Paths (same in Claude Code and OpenCode; set up by BidForge's `core/hosts/instal
 | `/bid list` · "switch to the UOB bid" | `bid list`, `bid use <deal>` |
 | `/bid export` · `one-pager` | Run it if built |
 
-**Built so far: deals, status, team, packs of files, configuration.** The stages themselves are
-not built yet (`bid status` marks each one "not built yet"). When asked to run a stage that isn't
-built, say so plainly and stop. Don't do the analysis freehand in the chat instead.
+**Built so far: deals, status, team, configuration, Stages 1 and 2.** Stages 3–7 aren't built yet
+(`bid status` marks them "not built yet"). When asked to run a stage that isn't built, say so
+plainly and stop. Don't do the analysis freehand in the chat instead.
+
+## Stage 1 — Inventory & understanding
+
+Four steps. Tell the user which one you're on; extraction on a big pack takes a while.
+
+**1. Intake (code).** `bid intake`. Report what couldn't be read (images, scanned pages, hidden
+sheets) straight away: the user may have a better copy.
+
+**2. Extraction (you, chunk by chunk).** Loop until `bid extract next` says all chunks are done:
+1. `bid extract next` (or `bid extract show K-NN` for several at once) prints the chunk: every block
+   with its ID, `CAND:<reason>` for blocks the code thinks may hold a requirement, `ctx` for the rest.
+2. Write `<deal>/data/work/K-NN.json` in the format the chunk shows:
+   - **One requirement per obligation**, in the buyer's words, shortened but not reworded. Split
+     compound sentences ("must do A and B within 4 hours" can be two). Never merge, summarise or skip.
+   - `obligation`: `disqualifier` if failing it excludes the bid (eligibility, pass/fail);
+     `mandatory` for must/shall/required; `desirable` for should/preferred/optional; else `standard`.
+   - Every `CAND` block is either cited by a requirement or dismissed with a reason (headings,
+     background, instructions meant for the buyer itself, pricing line items to be filled in). A run of pricing
+     lines can be dismissed as one range, `"B-0100..B-0150"`. Cite `ctx` blocks too if they hold a
+     requirement the code missed.
+   - Buyer compliance-matrix rows: one requirement per row, and `restates` lists the RFP-body
+     requirements the row restates (the chunk lists the candidates by section). Empty if none.
+3. `bid extract save K-NN <file>`. If it lists problems, fix the JSON and save again. The checks are
+   the fixed rules, so never weaken a requirement's wording to get past them.
+
+**3. Coverage (code).** `bid coverage`: every candidate accounted for, per document, and how the
+buyer's own matrix lines up with the RFP body. Show the user the totals and anything not read.
+
+**4. Stage 1 write-up (you).** `bid stage1 brief` prints the pack inventory, the blocks with dates and
+submission rules, and documents referenced but not found. Write `<deal>/data/work/stage1.json` in the
+format it shows, then `bid stage1 save <file>`, which writes `stages/stage-1.md`.
+- Dates: `as_written` quotes the source. A date you worked out (e.g. "+14 business days") is
+  **Inferred**, never Stated. "TBC" stays TBC.
+- `findings`: inconsistencies between documents (dates, references, versions), content that
+  looks copied from another RFP, internal buyer material left in the pack.
+- `unknowns` and `confirms` become U-xx / C-xx items in the register.
+
+**Hard gate.** Run `bid spotcheck` and show the user the sample, each requirement next to its
+source. Ask them to check it. Only when **they** say it's right: `bid spotcheck --ok`, then
+`bid gate pass stage1`. If they find problems: `bid spotcheck --issues "..."`, fix the chunk
+(`bid extract show K-NN`, save again), and re-check. Never pass a gate on your own judgement.
+
+## Stage 2 — Qualification (bid / no-bid)
+
+**1. Capture inputs (the user).** `bid capture` lists what the pack can't tell us: relationship,
+incumbent, competitors, budget, who decides, partner, why now, why it matters to us. Ask for all the
+missing ones at once, in plain words, and record each answer as given: `bid capture KEY="answer"`.
+"Don't know" is a valid answer, so record it. Never fill these in yourself, and never from memory.
+
+**2. Brief.** `bid stage2 brief` prints the Stage 1 summary, the capture inputs, the text about
+evaluation, every pass/fail requirement, the scorecard and the JSON to write.
+
+**3. Write `<deal>/data/work/stage2.json`, then `bid stage2 save <file>`.**
+- **2.1 Context** and **2.2 Evaluation** come from the pack (cite blocks) and the capture inputs
+  (`capture:KEY`). If the pack doesn't state the evaluation method or weights, say so: label it Unknown.
+  Wired-RFP signals (a competitor's terms, oddly specific asks, an impossible timeline) are *Inferred*.
+- **2.3** Assess **every** pass/fail requirement: `Yes` (with the evidence: a past answer, a doc, a
+  certificate), `At risk`, `No`, or `Unknown`. A `Yes` without evidence prints as *unverified*.
+  Product capability, certifications and licensing you can't show → `Unknown`, with an owner role
+  and a Confirm item. Apply the product pack's scope rules (e.g. no OT claims).
+- **2.4** Score each criterion 1–5 with the reason and what it rests on. If it depends on a capture
+  input nobody has given, score it `null`: the decision then stays **Pending**. Don't guess a number.
+- The code works out the weighted score and the recommendation. If you disagree with it, keep its
+  recommendation or give an `override_reason`, and show both to the user.
+
+**Hard gate.** Show the user the recommendation, the knockouts and at-risk items, and the score.
+The decision is agreed with the Account Executive, so ask who agreed it and record it:
+`bid gate pass stage2 --note "Agreed with <AE>, <date>"`. On **No-bid**, the rationale in
+`stages/stage-2.md` is what gets shared internally, and the analysis stops there.
 
 ## Start a deal
 

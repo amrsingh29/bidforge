@@ -138,6 +138,15 @@ def check(deal=None):
             problems.append(f"stages.{sid}.after: no stage `{s['after']}`")
         elif "after" in s and not stages[s["after"]].get("enabled", True):
             problems.append(f"stages.{sid}.after: `{s['after']}` is turned off")
+    q = config.get("qualification") or {}
+    crit = {k: v for k, v in (q.get("scorecard") or {}).items() if isinstance(v, dict) and v.get("enabled", True)}
+    total = sum(v.get("weight", 0) for v in crit.values())
+    if crit and total != 100:
+        problems.append(f"qualification.scorecard: weights add up to {total}, not 100 "
+                        f"({', '.join(f'{k} {v.get("weight", 0)}' for k, v in crit.items())})")
+    th = q.get("thresholds") or {}
+    if th and not (0 <= th.get("conditions", 0) <= th.get("bid", 0) <= 100):
+        problems.append("qualification.thresholds: need 0 ≤ conditions ≤ bid ≤ 100")
     for mid, m in (config.get("modes") or {}).items():
         for sid in (m or {}).get("stages", []):
             if sid not in stages:

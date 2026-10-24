@@ -1,0 +1,60 @@
+# How requirements are found and classified. Change any of it in your profile or a deal's overrides.
+
+requirements:
+  # Requirement types (instructions §3.2). Add your own as new keys.
+  types:
+    functional:     {label: Functional}
+    non_functional: {label: Non-functional}
+    security:       {label: Security}
+    integration:    {label: Integration}
+    service:        {label: Service}
+    commercial:     {label: Commercial}
+    legal:          {label: Legal}
+    administrative: {label: Administrative, note: submission rules, forms, qualification evidence}
+
+  # What the buyer's wording makes it. mandatory and disqualifier print as [MANDATORY] / [DISQUALIFIER].
+  obligations:
+    disqualifier: {label: DISQUALIFIER, note: failing it excludes the bid (pass/fail, eligibility)}
+    mandatory:    {label: MANDATORY, note: must / shall / required / mandatory}
+    standard:     {label: Standard, note: a requirement without strong wording}
+    desirable:    {label: Desirable, note: should / desirable / preferred / optional}
+
+  # Wording that makes a paragraph a candidate requirement for the code pass (regular expressions,
+  # case-insensitive). For an RFP in another language, add its words here.
+  candidate_words:
+    - must
+    - shall
+    - required?
+    - requires
+    - mandatory
+    - (?:is|are) to be
+    - needs? to
+    - should
+    - (?:is|are) expected to
+    - responsible for
+    - at (?:a )?minimum
+    - minimum of
+    - no (?:fewer|less) than
+    - not exceed
+    - within \d+
+    - prohibited
+    - not permitted
+    - disqualif\w*
+    - will be rejected
+    - respondents? (?:will|to)
+    - vendors? (?:will|to)
+
+  # How much text the model reads at a time in the extraction pass
+  chunk:
+    max_blocks: 45
+    max_chars: 9000
+
+  # Rows in a spreadsheet whose header has these words are the buyer's own compliance matrix:
+  # their numbering is kept as the buyer reference.
+  matrix_headers:
+    requirement: [requirement, description, question, specification, criteria]
+    reference: [ref, id, item, no.]
+    section: [section, clause, rfp ref]
+
+  spot_check:
+    sample: 12

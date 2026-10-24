@@ -1,0 +1,62 @@
+# Stage 2 — Qualification (bid / no-bid). Change any of it in your profile or a deal's overrides.
+
+qualification:
+  # Scored 1 (poor) to 5 (strong). Weights must add up to 100. Add a criterion as a new key.
+  scorecard:
+    strategic_fit:
+      label: "Strategic fit"
+      weight: 10
+      ask: "Does this deal matter beyond its own value (logo, region, product push)?"
+    solution_fit:
+      label: "Solution fit"
+      weight: 20
+      ask: "How much of the scope do we cover well?"
+    competitive:
+      label: "Competitive position"
+      weight: 10
+      ask: "Who else is bidding and how strong are we against them?"
+    relationship:
+      label: "Relationship / access to customer"
+      weight: 15
+      ask: "Do we know the decision makers? Did we shape this RFP?"
+    mandatory:
+      label: "Ability to meet mandatory requirements"
+      weight: 15
+      ask: "Can we meet every pass/fail item?"
+    commercial:
+      label: "Commercial attractiveness"
+      weight: 10
+      ask: "Deal size, margin, payment terms"
+    risk:
+      label: "Risk level (5 = low risk)"
+      weight: 10
+      ask: "Contractual, delivery and technical risk"
+    effort:
+      label: "Effort vs available resources"
+      weight: 5
+      ask: "Can the team carry this bid?"
+    timeline:
+      label: "Timeline feasibility"
+      weight: 5
+      ask: "Is there time to respond well, and to deliver?"
+
+  # Weighted score out of 100 (each 1–5 score scaled to 0–100 by weight).
+  thresholds:
+    bid: 65                # at or above: Bid
+    conditions: 45         # at or above (and below bid): Bid with conditions; below: No-bid
+  # A pass/fail item we can't meet means No-bid, whatever the score, unless the decision gives an override reason.
+  knockout_on: ["No"]
+
+  # What the pack can't tell us. Stage 2 asks for these (or reads them from StoryForge research) before scoring.
+  capture:
+    relationship:   Who do we know at the customer, and how well? Did we influence this RFP?
+    incumbent:      What do they use today, and who is the incumbent vendor or partner?
+    competitors:    Who else is likely bidding (and who is the favourite)?
+    budget:         Is there a known budget or price expectation?
+    decision:       Who decides, and what are they measured on?
+    partner:        Which partner (if any), and who is prime?
+    why_now:        Why are they buying now (contract end, audit, outage, programme)?
+    strategy:       Why does this deal matter to us (or not)?
+
+  can_meet: ["Yes", "At risk", "No", "Unknown"]
+  decisions: ["Bid", "Bid with conditions", "No-bid"]

@@ -36,10 +36,14 @@ PY
 install_engine() {
     say "==> Engine in $REPO/.venv"
     [ -x "$REPO/.venv/bin/python" ] || python3 -m venv "$REPO/.venv" || die "could not create the venv"
-    # -e . uses pyproject.toml: one install, real entry points, no hardcoded paths in a wrapper
-    "$REPO/.venv/bin/pip" install -q --disable-pip-version-check -e "$REPO" \
+    # Upgrade pip in the venv first. macOS's stock Python 3.9 ships pip 21.2, whose editable install
+    # shells out to a build env that has no pip of its own ("No module named pip") — the install then
+    # fails with a 40-line traceback that says nothing about the real cause. pip >= 22 handles this.
+    "$REPO/.venv/bin/python" -m pip install -q --disable-pip-version-check --upgrade pip >/dev/null 2>&1 || true
+    # -e . uses pyproject.toml: one install, real entry points, no hardcoded path in a wrapper
+    "$REPO/.venv/bin/python" -m pip install -q --disable-pip-version-check -e "$REPO" \
         || die "pip install failed (see the output above)"
-    ok "bid $( "$REPO/.venv/bin/python" -c 'import core.paths' 2>/dev/null && echo installed || echo 'installed')"
+    ok "bid installed ($( "$REPO/.venv/bin/python" -m pip --version | cut -d' ' -f1-2 ))"
 }
 
 # A stable path the hosts can hardcode, whether or not the venv is active.

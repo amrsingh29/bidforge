@@ -25,7 +25,7 @@ Paths (same in Claude Code and OpenCode; set up by BidForge's `core/hosts/instal
 | `/bid config` · "I want stage 7 off" | `bid config show [ID]`; changes go in a file in `~/.bidforge/profile/` (personal) or the deal's `bid.yaml` under `overrides:` (this RFP only); then `bid config check` |
 | `/bid list` · "switch to the UOB bid" | `bid list`, `bid use <deal>` |
 | `/bid export` · `one-pager` | Run it if built |
-| `/bid packs` · "use the BMC pack" | `bid packs suggest`, then `bid packs use <id> …`; `bid packs show <id>` |
+| `/bid packs` · "use the product pack" | `bid packs suggest`, then `bid packs use <id> …`; `bid packs show <id>` |
 | "Alex confirmed we do X" | `bid evidence record KEY="what was confirmed"`, cited as `confirm:KEY` |
 
 **Built so far: deals, status, team, configuration, packs, evidence, Stages 1–5.** Stages 6–7 aren't
@@ -161,7 +161,7 @@ early. A certification is only claimed with the certificate cited. Every regulat
 ## Start a deal
 
 Ask only what you can't find, all at once:
-1. Which customer, and a short name for this RFP (e.g. "NDP1 ITSM RFP").
+1. Which customer, and a short name for this RFP (e.g. "ITSM RFP 2026").
 2. Where the RFP files are (a folder or files). Never copy them; BidForge stores paths.
 3. Who's on the bid (optional now): AE, presales, partner, others.
 

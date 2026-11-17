@@ -17,5 +17,5 @@ tests/set/
 # A product pack with your employer's or a customer's catalogue must never be published. It belongs in
 # ~/.bidforge/local-packs/ (outside this repo), which outranks this folder anyway. Kept here as a
 # second lock, for the case where somebody drops a real catalogue straight into packs/ by habit.
-packs/products/bmc-helix/
+packs/products/<your-product>/
 packs/local/

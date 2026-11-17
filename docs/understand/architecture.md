@@ -1,4 +1,9 @@
-# Architecture
+# Architecture (summary)
+
+> The full architecture reference now lives at **[ARCHITECTURE.md](../../ARCHITECTURE.md)** — including
+> the AI boundary, the stage contract, the trust model, design decisions and known limits.
+>
+> This page keeps the diagrams and the module map that the docs link to, in short form.
 
 ```
                       ┌─────────────────────────────────────┐

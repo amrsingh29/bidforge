@@ -40,7 +40,9 @@ your own provider. On an NDA pack that is a decision, not a default.
 - **[Concepts](understand/concepts.md)** — the vocabulary, and why each word exists
 - **[How it works](understand/how-it-works.md)** — the flow, and the things the code refuses
 - **[The stages](understand/stages.md)** — what each stage asks, produces, and gates on
-- **[Architecture](understand/architecture.md)** — layers, modules, configuration, packs, evidence
+- **[Architecture](../ARCHITECTURE.md)** — the full reference: AI boundary, layers, module map, data
+  flow, stage contract, trust model, design decisions, known limits
+- **[Architecture, summarised](understand/architecture.md)** — the same shape in brief
 - **[AI hosts](understand/ai-hosts.md)** — how six agents share one engine, and how to add a seventh
 
 ## Reference

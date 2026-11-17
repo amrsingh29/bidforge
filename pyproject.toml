@@ -1,7 +1,7 @@
 [project]
 name = "bidforge"
 version = "0.1.0"
-description = "Reads an RFP pack and runs a staged bid analysis, stopping at gates for your decisions"
+description = "AI agent tool for RFP analysis: a staged bid method with deterministic checks at every gate"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }

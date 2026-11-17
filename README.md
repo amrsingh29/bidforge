@@ -1,8 +1,17 @@
 # BidForge
 
-**Reads an RFP pack and runs a staged bid analysis, stopping at gates where you decide.** Built for
-presales people who have to answer tenders and would rather know what they're being asked before they
-commit a week to it.
+**An AI agent tool for RFP analysis.** It gives an AI agent (Claude Code, Hermes, Goose and others) a
+staged method for reading a tender pack — and a deterministic engine that checks everything the agent
+writes, stopping at gates where you decide.
+
+> **What kind of AI project is this?** BidForge is an **agent tool**, not an agent. It has no model and
+> no reasoning loop of its own: the agent supplies the judgement, BidForge supplies the method, the
+> state on disk, and the checks that refuse an untrue claim. See
+> [Architecture](ARCHITECTURE.md#what-it-is-and-what-it-is-not) for the boundary, and why it is drawn
+> there.
+
+Built for presales people who have to answer tenders and would rather know what they're being asked
+before they commit a week to it.
 
 It extracts every requirement from the pack with a citation, then walks the bid: inventory and key
 dates → bid/no-bid → compliance matrix → solution and licensing → security and legal. It tells you what
@@ -96,7 +105,8 @@ own — see the [CLI reference](docs/reference/cli.md).
 | [Concepts](docs/understand/concepts.md) | Deal, requirement, obligation, domain, label, gate |
 | [How it works](docs/understand/how-it-works.md) | The flow, and what the code refuses |
 | [The stages](docs/understand/stages.md) | What each stage asks, produces and gates on |
-| [Architecture](docs/understand/architecture.md) | Layers, modules, packs, evidence, testing |
+| [**Architecture**](ARCHITECTURE.md) | The full reference: AI boundary, layers, data flow, stage contract, trust model, known limits |
+| [Architecture summary](docs/understand/architecture.md) | The same shape in brief |
 | [AI hosts](docs/understand/ai-hosts.md) | How six agents share one engine; adding a seventh |
 | [CLI reference](docs/reference/cli.md) | Every command |
 | [Configuration](docs/reference/configuration.md) | Layers, the four actions, every default key |

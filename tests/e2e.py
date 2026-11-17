@@ -143,12 +143,12 @@ with tempfile.TemporaryDirectory() as tmp:
     expect("*(unverified)*" in md, "a Yes without evidence prints as unverified")
     run("gate", "pass", "stage2", env=env, ok=False)
     expect(True, "Stage 2 gate needs a note saying who agreed")
-    run("gate", "pass", "stage2", "--note", "Agreed with Priya (AE)", env=env)
+    run("gate", "pass", "stage2", "--note", "Agreed with Alex (AE)", env=env)
     expect("Scope & requirements" in run("status", env=env).split("Next:")[-1], "after a Bid, the next step is Stage 3")
     s2["mandatory"][0]["can_meet"] = "No"
     s2["decision"]["recommendation"] = "No-bid"
     expect("knockouts" in s2save(), "a pass/fail item we can't meet knocks the bid out")
-    run("gate", "pass", "stage2", "--note", "Agreed with Priya (AE)", env=env)
+    run("gate", "pass", "stage2", "--note", "Agreed with Alex (AE)", env=env)
     expect("No-bid" in run("status", env=env).split("Next:")[-1], "after an agreed No-bid, the analysis stops")
 
 print()

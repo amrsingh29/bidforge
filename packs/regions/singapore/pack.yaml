@@ -1,0 +1,45 @@
+# Singapore region pack. Regulations and residency norms Stage 5 checks the RFP against.
+#
+# A regulation listed here is something to LOOK FOR in the RFP, not a claim that it applies: the stage
+# cites the clause that raises it, or records it as not mentioned. `source` is where the obligation
+# comes from, so the security or legal owner can check the reading.
+
+id: singapore
+label: Singapore
+type: region
+version: 0.1
+signals: [singapore, sg, mas, pdpc, imda, gcc, government commercial cloud, singpass, corp pass, wog]
+
+checks:
+  regulations:
+    - name: MAS Technology Risk Management Guidelines
+      owner: security
+      raises: Bank, insurer or capital-markets buyer, or the RFP mentions MAS, TRM, or outsourcing to a regulated institution
+      ask: Does the RFP require MAS TRM compliance, a TRM self-assessment, or audit rights over the service?
+      source: Monetary Authority of Singapore, Technology Risk Management Guidelines
+    - name: MAS Outsourcing / Cloud Notification
+      owner: security
+      raises: A regulated financial institution buying a cloud service, or asking about subcontracting and exit
+      ask: Does the buyer need notification or approval of the cloud arrangement, and do they need a right to audit sub-contractors?
+      source: MAS Guidelines on Outsourcing; MAS Notice 658 cloud notification
+    - name: PDPA (Personal Data Protection Act)
+      owner: legal
+      raises: Any personal data of Singapore residents is processed
+      ask: Does the RFP require PDPA compliance, a data protection officer contact, or specific consent and retention terms?
+      source: Personal Data Protection Act 2012 (Singapore)
+    - name: Government Commercial Cloud / GCC terms
+      owner: security
+      raises: Public-sector buyer, or the RFP names GCC, GICT, or a whole-of-government arrangement
+      ask: Must the service run in GCC, and which GCC classification (up to RESTRICTED) is required?
+      source: GovTech Singapore, Government Commercial Cloud
+    - name: IMDA / AI governance (Model AI Governance Framework)
+      owner: security
+      raises: Any AI, ML, virtual agent or automated decision feature in scope
+      ask: Does the buyer require the Model AI Governance Framework, explainability, or human-in-the-loop evidence?
+      source: IMDA Model AI Governance Framework
+
+  typical:
+    - text: Data residency inside Singapore is normally expected for regulated buyers, and stated for public sector
+    - text: Local entity or a local partner is often a condition of award
+    - text: Audit and examination rights over the provider are standard in financial services
+    - text: Business-continuity evidence (RTO/RPO tested) is commonly requested, not just a plan

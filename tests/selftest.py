@@ -48,9 +48,9 @@ with tempfile.TemporaryDirectory() as tmp:
     expect("not extracted yet" in out, "status: no dates before Stage 1")
 
     print("team")
-    run("team", "presales=Amrendra", "sales=Priya,Daniel", env=env)
+    run("team", "presales=Alex", "sales=Sam,Jordan", env=env)
     out = run("status", env=env)
-    expect("Amrendra" in out and "Priya, Daniel" in out, "people named per deal, several per role")
+    expect("Alex" in out and "Sam, Jordan" in out, "people named per deal, several per role")
     run("team", "wizard=Merlin", env=env, ok=False)
     expect(True, "unknown role refused")
 

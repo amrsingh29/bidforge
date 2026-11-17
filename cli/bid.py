@@ -19,11 +19,20 @@
   bid stage1 brief | save FILE.json  Stage 1 inventory, dates, submission rules, summary
   bid capture [KEY="answer" ...]     what the pack can't tell us (relationship, competitors…); KEY= clears
   bid stage2 brief | save FILE.json  Stage 2 qualification: context, pass/fail items, scorecard, decision
+  bid packs list | show ID | suggest | use ID... | add | remove | check
+                                     the domain knowledge a deal reads (product, region, industry)
+  bid evidence list | find "topic" | record KEY="what was confirmed"
+                                     what we can actually show for a claim
+  bid stage3 brief [--domain D] | save FILE.json | matrix | render
+                                     Stage 3: scope, then the compliance matrix one domain at a time
+  bid stage4 brief | save FILE.json | inputs    Stage 4: solution, gap mitigations, licensing inputs
+  bid stage5 brief | save FILE.json  Stage 5: security, regulations, AI checks, clause risk table
   bid gate pass STAGE [--note "..."] record that you passed a hard gate (only on your say-so)
-  bid doctor                         check the install
+  bid doctor                         check the install, and which hosts have /bid
   bid selftest                       run the self-test in a throwaway home and workspace
 
-Settings and your personal profile live in ~/.bidforge (BIDFORGE_HOME overrides).
+Settings, your personal profile and your private packs live in ~/.bidforge (BIDFORGE_HOME overrides).
+Documentation: https://github.com/amrsingh29/bidforge/tree/main/docs
 """
 import argparse, datetime as dt, json, os, subprocess, sys
 from pathlib import Path
@@ -31,6 +40,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from core import evidence, packs as P                                   # noqa: E402
 from core import settings                                               # noqa: E402
 from core.config import layers                                          # noqa: E402
 from core.deal import workspace as ws                                   # noqa: E402
@@ -38,13 +48,13 @@ from core.deal.deal import Deal, DealError, deal_base                   # noqa: 
 from core.paths import PROFILE                                          # noqa: E402
 from core.intake import coverage                                        # noqa: E402
 from core.intake.run import IntakeError, chunks, intake, remark                # noqa: E402
-from core.stages import stage1, stage2                                  # noqa: E402
+from core.stages import stage1, stage2, stage3, stage4, stage5          # noqa: E402
 from core.store import capture                                          # noqa: E402
 from core.store import registers, state                                 # noqa: E402
 from core.store import requirements as R                                # noqa: E402
 
 # Stages whose engine exists. Grows phase by phase (PLAN.md); the skill never pretends otherwise.
-BUILT = {"stage1", "stage2"}
+BUILT = {"stage1", "stage2", "stage3", "stage4", "stage5"}
 
 
 def fail(msg):
@@ -364,6 +374,230 @@ def cmd_stage2(a):
         fail("bid stage2 brief | save FILE.json")
 
 
+# ---------------------------------------------------------------- packs and evidence
+def cmd_packs(a):
+    all_ = P.available()
+    if a.action in (None, "list"):
+        if not all_:
+            print("no packs installed (packs/products, packs/regions, packs/industries)")
+            return
+        deal = None
+        if settings.load().get("current"):
+            try:
+                deal = Deal.current()
+            except DealError:
+                deal = None
+        chosen = set(P.selected(deal)) if deal else set()
+        print(f"{'':2} {'id':22} {'type':9} {'version':8} label")
+        for pid, p in sorted(all_.items(), key=lambda kv: (kv[1]["folder"], kv[0])):
+            # `·` marks a pack loaded from your private folder, so you can always see whether a pack in
+            # play is the published one or yours (it is not in the repo, and not in git)
+            print(f"{'*' if pid in chosen else ' '} {pid:22} {p['type']:9} {str(p['version'] or '—'):8} {p['label']}"
+                  + ("  ·  private" if p.get("private") else ""))
+        if deal:
+            print(f"\n* = used by {deal.slug}" + ("" if chosen else " (none chosen yet)"))
+        return
+    if a.action == "show":
+        if not a.ids:
+            fail("bid packs show <id>")
+        p = P.get(a.ids[0])
+        print(f"{p['id']} — {p['label']} ({p['type']}, version {p['version'] or '—'})\n  folder: {p['path']}")
+        meta = p["meta"]
+        if p["type"] == "product":
+            print(f"\ndomains ({len(meta.get('domains') or {})}):")
+            for k, d in (meta.get("domains") or {}).items():
+                print(f"  {k:16} {d.get('label', '')}")
+            cat = meta.get("catalogue") or {}
+            unsourced = [k for k, v in cat.items() if not P.sourced(v)]
+            print(f"\ncatalogue: {len(cat)} module(s), {len(cat) - len(unsourced)} sourced, "
+                  f"{len(unsourced)} with no evidence (a rating resting on those prints unverified)")
+            for k, v in cat.items():
+                print(f"  {k:20} {'✓ ' + str(v.get('evidence') or v.get('confirmed')) if P.sourced(v) else '· no source'}")
+            if meta.get("scope_rules"):
+                print("\nscope rules:")
+                for r in meta["scope_rules"]:
+                    print(f"  {r.get('id')}: {' '.join(str(r.get('text')).split())[:110]}…")
+        for ck in (p["checks"].get("regulations") or []):
+            print(f"  regulation: {ck['name']} (owner {ck.get('owner', '—')})")
+        return
+    if a.action == "check":
+        d = None
+        if a.deal or settings.load().get("current"):
+            d = deal_arg(a)
+        problems, unsourced = P.check(d)
+        if problems:
+            print("\n".join(f"✗ {x}" for x in problems))
+            sys.exit(1)
+        print("✓ every pack is valid")
+        if unsourced:
+            print(f"  {len(unsourced)} catalogue entry(s) have no source yet, so a rating resting on them "
+                  "prints as unverified:")
+            for x in unsourced:
+                print(f"    · {x}")
+            print("  fill `evidence:` or `confirmed:` in the pack, or leave them: unverified is honest")
+        return
+    if a.action in ("use", "add", "remove"):
+        d_ = deal_arg(a)
+        bid = d_.bid()
+        chosen = list(bid.get("packs") or [])
+        ids = a.ids or []
+        if a.action == "use":
+            for pid in ids:
+                P.get(pid)
+            chosen = ids
+        elif a.action == "add":
+            for pid in ids:
+                P.get(pid)
+                if pid not in chosen:
+                    chosen.append(pid)
+        else:
+            chosen = [p for p in chosen if p not in ids]
+        bid["packs"] = chosen
+        d_.save_bid(bid)
+        print(f"✓ packs: {', '.join(chosen) or 'none'}  (bid config check)")
+        return
+    if a.action == "suggest":
+        deal = deal_arg(a)
+        config, _ = layers.effective(deal)
+        found = P.suggest(deal, config)
+        if not found:
+            print("No pack matched this RFP's wording — that is normal for a short or unusual pack; "
+                  "the signals are only hints.\nChoose one yourself:\n"
+                  + "\n".join(f"  {pid:20} {p['type']:9} {p['label']}" for pid, p in sorted(P.available().items()))
+                  + "\nThen: bid packs use <id> [<id> ...]   (a product pack plus your region is the usual start)")
+        for pid, why in found:
+            print(f"  {pid:22} {P.available()[pid]['label']:32} matched: {why}")
+        return
+    fail(f"unknown packs action {a.action!r} (list, show, check, suggest, use, add, remove)")
+
+
+def cmd_evidence(a):
+    deal = deal_arg(a) if (a.deal or settings.load().get("current")) else None
+    if a.action == "add" or a.action == "record":
+        if not a.deal and deal is None:
+            fail("no deal (bid new, or --deal)")
+        key, _, text = (a.text or "").partition("=")
+        if not key or not text:
+            fail('bid evidence record KEY="what was confirmed"')
+        evidence.record(deal, key.strip(), text.strip())
+    if a.action in ("add", "record", "list"):
+        conf = evidence.confirmations(deal)
+        lib = evidence.library()
+        print(f"library: {evidence.LIBRARY}" + ("" if lib else "  (empty)"))
+        for eid, e in lib.items():
+            print(f"  {eid:44} {e['topic'][:60]}")
+        if deal is not None:
+            print(f"\nconfirmations recorded for {deal.slug}:")
+            for k, c in conf.items():
+                print(f"  {k:24} {c['text'][:70]}  ({c['by']}, {c['date']})")
+            if not conf:
+                print("  none (bid evidence record KEY=\"…\")")
+        return
+    if a.action == "find":
+        if not a.text:
+            fail("bid evidence find \"a topic or a requirement's wording\"")
+        hits = evidence.lookup(a.text, deal)
+        if not hits:
+            print("nothing found: a rating that relies on this should be unverified")
+            return
+        print(f"{hits['kind']} {hits['id']} (match {hits['score']})\n  {hits['source']}\n  {hits['snippet']}")
+        return
+    fail(f"unknown evidence action {a.action!r} (list, find, record)")
+
+
+# ---------------------------------------------------------------- stages 3, 4, 5
+def cmd_stage3(a):
+    deal = deal_arg(a)
+    config, _ = layers.effective(deal)
+    if a.action == "brief":
+        print(stage3.brief(deal, config, a.domain))
+    elif a.action == "save":
+        if not a.file:
+            fail("bid stage3 save FILE.json")
+        try:
+            data = json.loads(Path(a.file).read_text())
+        except (OSError, json.JSONDecodeError) as e:
+            fail(f"can't read {a.file}: {e}")
+        out, problems = stage3.save(deal, data, config)
+        if problems:
+            print("✗ Stage 3 not saved:\n" + "\n".join(f"  - {p}" for p in problems))
+            sys.exit(1)
+        m = stage3.matrix(deal, config)
+        print(f"✓ {out}: {m['rated']} of {m['requirements']} rated · {len(m['gaps'])} gaps · "
+              f"{len(m['unverified'])} unverified · {m['domains_done']}/{m['domains_total']} domains done")
+        if m["complete"]:
+            print("  matrix complete: bid stage3 render")
+    elif a.action == "render":
+        path, problems = stage3.save_render(deal, config)
+        if problems:
+            print("✗ can't render Stage 3:\n" + "\n".join(f"  - {p}" for p in problems))
+            sys.exit(1)
+        print(f"✓ Stage 3 written: {path}")
+    elif a.action == "matrix":
+        m = stage3.matrix(deal, config)
+        print(f"{m['rated']} of {m['requirements']} requirements rated ({m['domains_done']}/{m['domains_total']} domains)")
+        for k, v in m["counts"].items():
+            if v:
+                print(f"  {k:18} {v}")
+        print(f"covered {m['covered']} ({m['covered'] / max(m['rated'], 1):.0%}) · gaps {len(m['gaps'])} "
+              f"(mandatory {len(m['mandatory_gaps'])}) · unverified {len(m['unverified'])}")
+        if not m["complete"]:
+            left = sorted({x["domain"] for x in m["rows"]}) if m["domains_done"] else []
+            print(f"✗ the matrix is not complete: {m['requirements'] - m['rated']} requirement(s) unrated "
+                  f"in {m['domains_total'] - m['domains_done']} domain(s)"
+                  + (f" (rated so far: {', '.join(sorted({x['domain'] for x in m['rows']}))})" if left else ""))
+            sys.exit(1)
+    else:
+        fail("bid stage3 brief [DOMAIN] | save FILE.json | matrix | render")
+
+
+def cmd_stage4(a):
+    deal = deal_arg(a)
+    config, _ = layers.effective(deal)
+    if a.action == "brief":
+        print(stage4.brief(deal, config))
+    elif a.action == "save":
+        if not a.file:
+            fail("bid stage4 save FILE.json")
+        try:
+            data = json.loads(Path(a.file).read_text())
+        except (OSError, json.JSONDecodeError) as e:
+            fail(f"can't read {a.file}: {e}")
+        out, problems = stage4.save(deal, data, config)
+        if problems:
+            print("✗ Stage 4 not saved:\n" + "\n".join(f"  - {p}" for p in problems))
+            sys.exit(1)
+        open_ = sum(1 for m in data.get("mitigations") or [] if not m.get("closes_it"))
+        print(f"✓ Stage 4 saved: {out}\n  gaps mitigated {len(data.get('mitigations') or [])} · still open {open_}")
+    elif a.action == "inputs":
+        for field, v in stage4.inputs(deal, config).items():
+            print(f"{field}: {len(v['have'])} recorded" + (f", missing {', '.join(v['missing'])}" if v["missing"] else ""))
+    else:
+        fail("bid stage4 brief | save FILE.json | inputs")
+
+
+def cmd_stage5(a):
+    deal = deal_arg(a)
+    config, _ = layers.effective(deal)
+    if a.action == "brief":
+        print(stage5.brief(deal, config))
+    elif a.action == "save":
+        if not a.file:
+            fail("bid stage5 save FILE.json")
+        try:
+            data = json.loads(Path(a.file).read_text())
+        except (OSError, json.JSONDecodeError) as e:
+            fail(f"can't read {a.file}: {e}")
+        out, problems = stage5.save(deal, data, config)
+        if problems:
+            print("✗ Stage 5 not saved:\n" + "\n".join(f"  - {p}" for p in problems))
+            sys.exit(1)
+        high = sum(1 for c in data.get("clauses") or [] if c.get("risk") in ("high", "unknown"))
+        print(f"✓ Stage 5 saved: {out}\n  clauses needing Legal: {high}")
+    else:
+        fail("bid stage5 brief | save FILE.json")
+
+
 def cmd_gate(a):
     deal = deal_arg(a)
     config, _ = layers.effective(deal)
@@ -371,8 +605,33 @@ def cmd_gate(a):
     s = st["stages"].get(a.stage)
     if a.stage not in (config.get("stages") or {}):
         fail(f"no stage {a.stage}")
-    if not s or not s.get("done"):
+    if a.stage == "stage3":
+        # Stage 3 is gated on the matrix on disk, not on a rendered document: the ratings are the work,
+        # and a stage that hasn't rendered yet is still reviewable domain by domain.
+        m = stage3.matrix(deal, config)
+        if not m["rated"]:
+            fail("stage3 hasn't been run yet (bid stage3 brief)")
+        why = []
+        if not m["complete"]:
+            why.append(f"the matrix isn't complete ({m['rated']} of {m['requirements']} rated)")
+        if m["unverified"]:
+            why.append(f"{len(m['unverified'])} rating(s) are unverified: source them, or record that you "
+                       "accept them in --note")
+        if why:
+            fail("can't pass the Stage 3 gate: " + "; ".join(why))
+    elif not s or not s.get("done"):
         fail(f"{a.stage} hasn't been run yet")
+    if a.stage == "stage4":
+        data = stage4.load(deal)
+        open_ = [m["req"] for m in data.get("mitigations") or [] if not m.get("closes_it")]
+        if open_ and not a.note:
+            fail(f"{len(open_)} gap(s) stay open after mitigation ({', '.join(open_)}): say in --note that they are "
+                 "known and accepted, e.g. --note \"Open gaps accepted by <AE>, <date>\"")
+    if a.stage == "stage5":
+        data = stage5.load(deal)
+        highs = [c for c in data.get("clauses") or [] if c.get("risk") in ("high", "unknown")]
+        if highs and not a.note:
+            fail(f"{len(highs)} clause(s) are unacceptable as written: record Legal's position with --note")
     if a.stage == "stage1":
         why = []
         if not coverage.report(deal)["complete"]:
@@ -386,10 +645,15 @@ def cmd_gate(a):
         if s.get("recommendation") == "Pending":
             fail("Stage 2 is Pending (criteria not scored): get the missing inputs and save it again")
         if not a.note:
-            fail("say who agreed the decision, e.g. --note \"Agreed with James (AE), 24 Oct\"")
+            fail("say who agreed the decision, e.g. --note \"Agreed with Alex (AE), 24 Oct\"")
+    if s is None:                              # a stage whose work is on disk but not yet rendered
+        s = {"done": True, "version": 0, "saved": f"{dt.date.today():%Y-%m-%d}",
+             **({"recommendation": None} if a.stage == "stage3" else {})}
+        st["stages"][a.stage] = s
     s.update({"gate_passed": True, "gate_note": a.note or "", "gate_date": f"{dt.date.today():%Y-%m-%d}"})
     state.save(deal, st)
-    print(f"✓ {config['stages'][a.stage]['name']}: gate passed")
+    print(f"✓ {config['stages'][a.stage]['name']}: gate passed"
+          + (" (the matrix is rated but not rendered: bid stage3 render)" if a.stage == "stage3" and not s.get("version") else ""))
 
 
 # ---------------------------------------------------------------- config
@@ -444,25 +708,60 @@ def cmd_doctor(a):
         ok &= good
         print(f"  {'✓' if good else '✗'} {msg}" + (f"  ({fix})" if fix and not good else ""))
 
-    line(sys.version_info >= (3, 10), f"Python {sys.version.split()[0]}", "needs 3.10+")
+    # 3.9 is the real floor: no PEP 604 unions or 3.10-only syntax anywhere in the code, and the full
+    # test suite passes on 3.9.6. Claiming 3.10 was wrong and put first-time users off for no reason.
+    line(sys.version_info >= (3, 9), f"Python {sys.version.split()[0]}", "needs 3.9+")
     try:
         import yaml
         line(True, f"PyYAML {yaml.__version__}")
     except ImportError:
-        line(False, "PyYAML", "re-run core/hosts/install.sh")
+        line(False, "PyYAML", "run: bash hosts/install-all.sh")
     w = ws.workspace()
     line(w is None or w.is_dir(), f"workspace: {w or 'not set (deals go to BidForge deals/)'}", "bid config --workspace PATH")
-    claude = Path.home() / ".claude/skills/bid"
-    line(claude.exists(), "Claude Code skill /bid", "re-run core/hosts/install.sh")
-    oc = Path(os.environ.get("OPENCODE_CONFIG_DIR", Path.home() / ".config/opencode")) / "commands/bid.md"
-    line(oc.exists(), "OpenCode command /bid", "re-run core/hosts/install.sh")
+
+    # Hosts: report the ones installed and the ones still missing, rather than only the two we used
+    # to support. A host whose settings folder doesn't exist isn't a failure — you just don't use it.
+    env = os.environ
+    home = Path.home()
+    hosts = [
+        ("Claude Code", Path(env.get("CLAUDE_CONFIG_DIR") or home / ".claude"),
+         ["skills/bid/SKILL.md"], True),
+        ("OpenCode", Path(env.get("OPENCODE_CONFIG_DIR") or home / ".config/opencode"),
+         ["commands/bid.md"], True),
+        ("Hermes", Path(env.get("HERMES_HOME") or home / ".hermes"),
+         ["skills/bid/SKILL.md"], True),
+        ("Goose", Path(env.get("GOOSE_CONFIG_DIR") or home / ".config/goose"),
+         ["recipes/bid.yaml"], True),
+        ("omp", Path(env.get("OMP_AGENT_DIR") or home / ".omp/agent"),
+         ["commands/bid.md"], True),
+        ("Open Worker", Path(env.get("COWORKER_HOME") or home / ".config/coworker"),
+         ["skills/bid/SKILL.md"], True),
+    ]
+    installed, absent = [], []
+    for name, base, rels, _ in hosts:
+        present = base.is_dir()
+        ready = present and all((base / r).exists() for r in rels)
+        if ready:
+            installed.append(name)
+        elif present:
+            absent.append(name)          # the tool is here but BidForge isn't registered in it
+    if installed:
+        line(True, "hosts with /bid: " + ", ".join(installed))
+    if absent:
+        line(False, "installed but missing /bid: " + ", ".join(absent), "bash hosts/install-all.sh")
+    if not installed and not absent:
+        line(False, "no supported AI host found", "install one (Claude Code, OpenCode, Hermes, Goose, omp or Open Worker)")
+    plugins = P.available()
+    private = [p for p in plugins.values() if p.get("private")]
+    line(True, f"packs: {len(plugins)} installed" + (f", {len(private)} private" if private else ""))
     problems = layers.check()
     line(not problems, "configuration (defaults + personal profile)", "bid config check")
     sys.exit(0 if ok else 1)
 
 
 def cmd_selftest(a):
-    codes = [subprocess.call([sys.executable, str(ROOT / "tests" / t)]) for t in ("selftest.py", "e2e.py")]
+    codes = [subprocess.call([sys.executable, str(ROOT / "tests" / t)])
+             for t in ("selftest.py", "e2e.py", "e2e_stages.py")]
     sys.exit(max(codes))
 
 
@@ -511,6 +810,21 @@ def main():
     s.add_argument("assign", nargs="*", metavar="KEY=answer"); s.add_argument("--deal")
     s = sub.add_parser("stage2"); s.set_defaults(fn=cmd_stage2)
     s.add_argument("action", choices=["brief", "save"]); s.add_argument("file", nargs="?"); s.add_argument("--deal")
+    s = sub.add_parser("packs"); s.set_defaults(fn=cmd_packs)
+    s.add_argument("action", nargs="?"); s.add_argument("ids", nargs="*")
+    s.add_argument("--deal")
+    s = sub.add_parser("evidence"); s.set_defaults(fn=cmd_evidence)
+    s.add_argument("action", nargs="?", choices=[None, "list", "find", "record", "add"])
+    s.add_argument("text", nargs="?"); s.add_argument("--deal")
+    s = sub.add_parser("stage3"); s.set_defaults(fn=cmd_stage3)
+    s.add_argument("action", choices=["brief", "save", "matrix", "render"])
+    s.add_argument("file", nargs="?"); s.add_argument("--domain", dest="domain"); s.add_argument("--deal")
+    s = sub.add_parser("stage4"); s.set_defaults(fn=cmd_stage4)
+    s.add_argument("action", choices=["brief", "save", "inputs"])
+    s.add_argument("file", nargs="?"); s.add_argument("--deal")
+    s = sub.add_parser("stage5"); s.set_defaults(fn=cmd_stage5)
+    s.add_argument("action", choices=["brief", "save"])
+    s.add_argument("file", nargs="?"); s.add_argument("--deal")
     s = sub.add_parser("gate"); s.set_defaults(fn=cmd_gate)
     s.add_argument("action", choices=["pass"]); s.add_argument("stage"); s.add_argument("--note"); s.add_argument("--deal")
 

@@ -3,7 +3,7 @@
     render_chunk(deal, chunk_id) -> text the model reads (blocks, candidates, context, the JSON to write)
     save_chunk(deal, chunk_id, data, config) -> (saved requirements, problems)   nothing is kept if problems
     load(deal) -> {"items": [...], "dismissed": [...]}
-    cite(block) -> "BWD_NDP1_ITSM_RFP_03062026, §5.1.2 ¶3"
+    cite(block) -> "main-rfp.docx, §5.1.2 ¶3"
 
 A requirement:  {id: REQ-001, blocks: [B-…], text, type, obligation, buyer_ref, restates: [REQ-…],
                  section, chunk, via: candidate|added}

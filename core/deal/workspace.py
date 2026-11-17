@@ -1,7 +1,7 @@
 """Where a customer's folder is, from the user's own settings (same behaviour as StoryForge).
 
-    resolve("BW Digital")      -> Path of the customer folder (or raises Ambiguous / NotFound)
-    create("BW Digital", "Singapore") -> a new customer folder under the workspace
+    resolve("Acme Bank")      -> Path of the customer folder (or raises Ambiguous / NotFound)
+    create("Acme Bank", "Singapore") -> a new customer folder under the workspace
     remember(customer, path)   -> pin a folder whose name doesn't match the customer name
 
 Customer folders are found by name at any depth under `workspace` (customer_path "auto"), or by a

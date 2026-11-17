@@ -142,8 +142,10 @@ def check(deal=None):
     crit = {k: v for k, v in (q.get("scorecard") or {}).items() if isinstance(v, dict) and v.get("enabled", True)}
     total = sum(v.get("weight", 0) for v in crit.values())
     if crit and total != 100:
-        problems.append(f"qualification.scorecard: weights add up to {total}, not 100 "
-                        f"({', '.join(f'{k} {v.get("weight", 0)}' for k, v in crit.items())})")
+        # kept as a plain expression rather than a nested f-string: f-strings that reuse the enclosing
+        # quote character need Python 3.12, and this project supports 3.10
+        parts = ", ".join(f"{k} {v.get('weight', 0)}" for k, v in crit.items())
+        problems.append(f"qualification.scorecard: weights add up to {total}, not 100 ({parts})")
     th = q.get("thresholds") or {}
     if th and not (0 <= th.get("conditions", 0) <= th.get("bid", 0) <= 100):
         problems.append("qualification.thresholds: need 0 ≤ conditions ≤ bid ≤ 100")

@@ -1,0 +1,61 @@
+# Stage 4 — Solution & licensing. Change any of it in your profile or a deal's overrides.
+
+solution:
+  # How a gap from Stage 3 can be closed. A mitigation that isn't one of these is an opinion, not a plan.
+  # `closes_it` says whether the requirement becomes met; anything false stays open and is shown as such.
+  mitigations:
+    configure:
+      label: Configuration
+      closes_it: true
+      note: "no development; implementation work"
+    partner:
+      label: Partner / third party
+      closes_it: true
+      note: "name the partner and who owns the risk"
+    roadmap:
+      label: Roadmap commitment
+      closes_it: false
+      note: "never a commitment; raise [ROADMAP RISK]"
+    custom:
+      label: Custom build or bespoke work
+      closes_it: true
+      note: "name who builds it and the effort"
+    integration:
+      label: Integration layer
+      closes_it: true
+      note: "what system, which direction"
+    accept:
+      label: Accept the gap
+      closes_it: false
+      note: "say why it doesn't matter to the buyer"
+    clarify:
+      label: Clarification
+      closes_it: false
+      note: "the requirement may not mean what it says"
+
+  # The sections of the architecture outline. Free prose per section, each citing requirements or blocks.
+  architecture_sections:
+    - tenant_and_hosting
+    - components
+    - integrations
+    - data_flow
+    - environments
+    - non_functional_posture
+
+  # Effort bands for the services estimate. BidForge never gives days or prices; it asks for the band
+  # and records who gave it.
+  effort_bands:
+    - not estimated
+    - "XS (< 3 days)"
+    - "S (3-10 days)"
+    - "M (10-30 days)"
+    - "L (30-90 days)"
+    - "XL (> 90 days)"
+
+  # Anything the buyer must be asked before the solution can be priced.
+  solution_questions:
+    - Which modules in this scope does the buyer expect to use from day one, and which later?
+    - Which systems must be integrated at go-live, and who owns each integration?
+    - Is the buyer expecting any development, or configuration only?
+    - What data has to migrate, and who cleans it before migration?
+    - Which partner delivers implementation, and who is prime?

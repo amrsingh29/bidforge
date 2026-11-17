@@ -1,10 +1,13 @@
 # BidForge v1: build plan
 
-**Status:** Phase 0 done; Phase 1 built and run on BW and VADS (open: matrix linking in the product, a second-shape test pack); Stage 2 built (rest of Phase 2 open) · **Created:** 2026-10-24 · **Location:** `~/Developer/projects/bidforge`
+**Status:** Phase 0 done; Phase 1 built and run end to end on real multi-document pack; Stage 2 built
+(rest of Phase 2 open); Phase 3 engine done — pack loader, product/region/industry packs, evidence lookup
+and Stages 3–5, with the example product pack shipped unsourced on purpose (open: a second-shape test
+pack, an Excel-questionnaire RFP) · **Created:** 2026-10-24
 
 BidForge reads an RFP pack and helps a presales lead decide whether to bid, what to propose, who
 does what, and where to focus to win. It works stage by stage, with a gate after each stage where it
-stops for you to check. It works in Claude Code and OpenCode, the same way StoryForge does.
+stops for you to check. It runs in Claude Code, OpenCode, or straight from the CLI.
 
 It does **not** draft the RFP answers in v1. Drafting comes later, once an answer library you trust exists.
 
@@ -12,20 +15,20 @@ It does **not** draft the RFP answers in v1. Drafting comes later, once an answe
 
 | Source | What BidForge takes from it |
 |---|---|
-| "RFP Analysis Instructions — BMC Helix Presales (Staged Workflow)" (the user's claude.ai Project) | The **method**: 7 stages, gates, commands (`Stage N`, `Redo`, `Status`, `Fast-track`, `Export`), Stated/Inferred/Unknown labels, U-xx/C-xx registers, BMC domain list, licensing and services inputs, ASEAN regulatory and AI checks, post-award responsibilities, neutral clarification questions. This becomes the **shipped default**. |
+| A staged presales method used on real tenders | The **shape**: 7 stages, a gate after each, Stated/Inferred/Unknown labels, U-xx/C-xx registers, licensing and services inputs, regulatory and AI checks, post-award responsibilities, neutral clarification questions. This becomes the **shipped default**. |
 | Shipley / APMP practice | Compliance matrix, bid/no-bid scorecard, evaluator point of view, colour-team review gates |
-| StoryForge | Host installer, deal folder inside the customer's own folder, fact ledger, "stop for corrections" gates, honesty rules |
-| Design review (this plan) | Code-based extraction with a coverage report, files on disk instead of chat memory, comply ratings grounded in evidence, addendum diffs, packs, layered configuration |
+| Design review (this plan) | Code-based extraction with a coverage report, files on disk instead of chat memory, compliance ratings grounded in evidence, addendum diffs, packs, layered configuration |
 
 ## Ground rules
 
-1. **Generic engine, domain knowledge in packs.** The engine knows nothing about BMC, Helix or
-   ASEAN. Products, regions and industries live in packs (see below).
+1. **Generic engine, domain knowledge in packs.** The engine knows nothing about any product, region
+   or industry. Those live in packs (see below). The packs this repo ships are skeletons; your own
+   belong in `~/.bidforge/local-packs/`, outside git.
 2. **Customer content never enters git.** RFP packs, deal folders and past answers stay local and
    git-ignored. RFP packs are usually under NDA.
 3. **The user's own files are never changed.** BidForge writes only to its own subfolder of the deal.
 4. **Proven on several different RFPs, not one** (see Test set). A phase isn't done until it passes
-   on all of them, in both Claude Code and OpenCode.
+   on all of them, in every supported host.
 
 ## Fixed engine rules (not configurable)
 
@@ -82,7 +85,7 @@ decision) → `/bid` (Stages 3–6, then clarifications approval, then Stage 7 a
 | `/bid one-pager` | The deal one-pager on its own, at any stage |
 | `/bid setup` · `/bid config` | First-time setup; show, check or change your configuration |
 
-Plain words work too ("run stage 3 on volume 2"). All real work goes through the `bid` CLI, so both hosts behave the same.
+Plain words work too ("run stage 3 on volume 2"). All real work goes through the `bid` CLI, so every host behaves the same.
 
 ## The 7 stages (shipped default)
 
@@ -99,7 +102,7 @@ Plain words work too ("run stage 3 on volume 2"). All real work goes through the
 Each stage ends with the same footer: gate checklist, new U/C items, recommended next step.
 
 **Capture inputs** (relationship, competitor intel, incumbent history) can't come from the pack.
-Stage 2 asks you for them, or reads them from StoryForge research if it exists for the customer.
+Stage 2 asks you for them directly, or reads them from a research folder if one exists for the customer.
 
 **Evaluator view.** Stages 2 and 7 include an explicit "how will this be scored" pass, reading
 each section the way the buyer's technical evaluator and procurement will.
@@ -127,12 +130,12 @@ A pack is a folder of knowledge the stages read. The engine has none of this bui
 
 | Pack type | Contains | v1 packs |
 |---|---|---|
-| **Product** | Catalogue (modules and what each covers), domains, licence metrics, sizing inputs, known integrations, scope rules, where evidence lives | `bmc-helix`, built with the user at setup. Its scope rules include the IT-side / no-OT rule. |
+| **Product** | Catalogue (modules and what each covers), domains, licence metrics, sizing inputs, known integrations, scope rules, where evidence lives | `example-product`, a skeleton to copy. Your real catalogue goes in `~/.bidforge/local-packs/products/`, never in git. |
 | **Region** | Regulations, data residency norms, local entity and partner rules | `singapore`, `malaysia` (then `indonesia`, `thailand`) |
 | **Industry** | Typical requirements, risks and regulators for a sector | `banking`, `government` |
 
 `/bid new` suggests packs from what the pack text says (for example "Singapore, bank, MAS TRM
-referenced") and you confirm. A deal can use more than one product pack, e.g. BMC plus a partner's services.
+referenced") and you confirm. A deal can use more than one product pack, e.g. your product plus a partner's services.
 
 **Evidence for compliance ratings,** in order of preference:
 1. Past RFP responses. A **Loopio library export** can be used here as a source even if Loopio isn't used day to day.
@@ -180,12 +183,11 @@ mid-bid, their open items move to the replacement and a handover list is produce
 
 ## Where work is saved
 
-As in StoryForge, the user sets the workspace once. Each deal lives in the customer's own folder:
+The user sets the workspace once. Each deal lives in the customer's own folder:
 
 ```
 <workspace>/…/<Customer>/
 ├── (your own files, untouched; the RFP pack can stay where it is)
-├── storyforge/            StoryForge's work, if any
 └── bidforge/
     └── <rfp-name>/
         ├── bid.yaml           team, packs, overrides
@@ -195,15 +197,15 @@ As in StoryForge, the user sets the workspace once. Each deal lives in the custo
         └── output/            bid-workbook.xlsx, deal-one-pager.pdf, clarifications.xlsx
 ```
 
-`facts.md` uses StoryForge's format, so `/forge-story` and `/forge-deck` can build the orals deck
-from the same confirmed facts.
+`facts.md` is plain markdown with one confirmed fact per line, so a deck or orals builder can read
+the same confirmed facts instead of asking again.
 
 ## Final outputs
 
 | Output | For |
 |---|---|
 | **Bid workbook (xlsx)** | The team's working tool. Tabs: Summary · Compliance Matrix (filterable by owner, domain, level) · NFRs · Bid RACI · Post-award responsibilities · Risks · Clarifications · Open items (U/C) · Work plan · Workload. It's the single source; everything else is generated from it. |
-| **Deal one-pager** (`/bid one-pager`) | An internal, confidential overview that grows with the stages: deal snapshot and team, key dates with days left, what they want, bid recommendation, fit at a glance (% by compliance level, mandatory not OOTB), proposed solution, top 5 risks, disqualifier watch, open U/C items, win themes, next actions. Can be generated at any point. Unassessed sections say "not yet assessed". Every item carries its REQ, risk or U/C ID. Versions are kept. Sections are configurable. Rendered as a plain PDF by BidForge, or BMC-branded through `/forge-visual`'s executive one-pager when StoryForge is installed. At Stage 2 it serves as the bid/no-bid decision brief. |
+| **Deal one-pager** (`/bid one-pager`) | An internal, confidential overview that grows with the stages: deal snapshot and team, key dates with days left, what they want, bid recommendation, fit at a glance (% by compliance level, mandatory not OOTB), proposed solution, top 5 risks, disqualifier watch, open U/C items, win themes, next actions. Can be generated at any point. Unassessed sections say "not yet assessed". Every item carries its REQ, risk or U/C ID. Versions are kept. Sections are configurable. Rendered as a plain PDF by BidForge; a branding pass is a separate optional step. At Stage 2 it serves as the bid/no-bid decision brief. |
 | **Clarifications** | In the buyer's required format, ready for you to review and submit |
 | **Stage files** | The full reasoning per stage, readable on their own |
 
@@ -220,17 +222,16 @@ bidforge/
 │   ├── evidence/      past-answer and doc lookup
 │   ├── plan/          RACI validation, back-scheduling from the deadline, workload
 │   ├── export/        xlsx workbook, deal one-pager, clarifications
-│   ├── deal/          customer-folder lookup (same behaviour as StoryForge)
-│   └── hosts/         installer for Claude Code and OpenCode
+│   ├── deal/          customer-folder lookup
+│   └── hosts/         one installer per host + install-all.sh (detects which are installed)
 ├── defaults/          the shipped method: stages/*.md, scorecard, levels, roles, RACI, calendar rules
-├── packs/             products/bmc-helix · regions/* · industries/*
+├── packs/             products/example-product · regions/* · industries/*
 ├── skills/bid/        one skill, a stage router, plus shared references
 ├── cli/               the `bid` command
 └── tests/             test set definitions (paths only), expected results, evals
 ```
 
-BidForge is its own repo (private `amrsingh29/bidforge`). It copies StoryForge's installer and
-deal-folder logic rather than importing them, so either project can change without breaking the other.
+BidForge is its own repo.
 
 ## Test set
 
@@ -239,9 +240,9 @@ and expected results only, outside git.
 
 | # | Pack | Tests |
 |---|---|---|
-| 1 | BW Digital NDP1 (Singapore, datacentre) | Multi-document Word pack, buyer compliance matrix, Q&A, OT-adjacent scope. Compared with the user's real compliance matrix and analysis. |
-| 2 | An Excel questionnaire RFP (e.g. the BMC Discovery RFP template) | Row-based extraction, the buyer's columns preserved |
-| 3 | A government or financial-services tender (e.g. KWAP, if suitable) | Long prose PDF, regulatory pack suggestion |
+| 1 | A datacentre operator's multi-document RFP | Multi-document Word pack, buyer compliance matrix, Q&A, adjacent-market scope. Compared with the real compliance matrix and analysis. |
+| 2 | An Excel questionnaire RFP | Row-based extraction, the buyer's columns preserved |
+| 3 | A government or financial-services tender | Long prose PDF, regulatory pack suggestion |
 | 4 | A short RFI | The lighter path (pricing and legal skipped) |
 
 **Pass criteria for extraction:** every [MANDATORY] item found, at least 95% of the requirements in
@@ -253,13 +254,13 @@ Each phase ends with a test that must pass before the next starts.
 
 | # | Phase | Builds | Done when |
 |---|---|---|---|
-| 0 | **Scaffold** ✅ | Repo, `bid` CLI, host installer, config layering skeleton, deal folder, `bid doctor` | `/bid status` runs on an empty deal in Claude Code and OpenCode |
+| 0 | **Scaffold** ✅ | Repo, `bid` CLI, host installers, config layering skeleton, deal folder, `bid doctor` | `/bid status` runs on an empty deal in every supported host |
 | 1 | **Intake + Stage 1** | Parsers, two-pass extraction, coverage report, spot-check gate, REQ IDs, inventory, dates, submission rules, summary | Test-set packs 1 and 2 meet the extraction pass criteria |
-| 2 | **State + Stage 2 + fast-track** | U/C registers, `status`, `redo` with versions, scorecard, gates, capture inputs, fast-track | A fresh session picks up exactly where the last one stopped; the BW bid/no-bid matches the user's judgement or the differences are explained |
-| 3 | **Packs + Stages 3–5** | `bmc-helix` product pack (built with the user), Singapore/Malaysia and banking/government packs, evidence lookup, compliance matrix, solution, licensing and services inputs, security/legal | BW compliance ratings compared with the user's real matrix; no OT over-claims; every rating cites evidence or says unverified |
-| 4 | **Stages 6–7 + export + addenda** | Roles and people, RACI validation, back-scheduled calendar, risks, clarifications, win themes, work plan, xlsx workbook, deal one-pager (plain PDF and the forge-visual hand-off), addendum diff | Full BW run produces the workbook and one-pager; a one-pager after Stage 1 shows only Stage 1 sections; an addendum re-run keeps owners and ratings |
+| 2 | **State + Stage 2 + fast-track** | U/C registers, `status`, `redo` with versions, scorecard, gates, capture inputs, fast-track | A fresh session picks up exactly where the last one stopped; the bid/no-bid recommendation matches a human's judgement or the differences are explained |
+| 3 | **Packs + Stages 3–5** | Product pack skeleton, Singapore/Malaysia and banking/government packs, evidence lookup, compliance matrix, solution, licensing and services inputs, security/legal | Compliance ratings compared with a real matrix; no scope-rule over-claims; every rating cites evidence or says unverified |
+| 4 | **Stages 6–7 + export + addenda** | Roles and people, RACI validation, back-scheduled calendar, risks, clarifications, win themes, work plan, xlsx workbook, deal one-pager, addendum diff | A full deal run produces the workbook and one-pager; a one-pager after Stage 1 shows only Stage 1 sections; an addendum re-run keeps owners and ratings |
 | 5 | **Customisation** | The four actions on stable IDs, custom sections and stages, `config show / check`, upgrade-safe personal profile | A colleague-style profile (different scorecard, an extra stage, a role removed) runs cleanly on test packs 1–3 |
-| 6 | **Release** | Test packs 3 and 4, GETTING-STARTED, installer self-test | All four test packs pass in both hosts |
+| 6 | **Release** | Test packs 3 and 4, GETTING-STARTED, installer self-test | All four test packs pass in every supported host |
 
 **v2, later:** team profiles, a guided `bid config customise` chat, profile import/export,
 `bid-respond` (draft answers from the library, marked DRAFT RESPONSE), Red Team review scoring,
@@ -274,6 +275,4 @@ win/loss feedback to tune the scorecard, an optional Loopio export.
 
 ## Tracking
 
-- GitHub: private repo `amrsingh29/bidforge` (created at the start of Phase 0)
-- Issue **"BidForge v1"** with one checkbox per phase
 - One branch per phase; merge only when its test passes and you approve

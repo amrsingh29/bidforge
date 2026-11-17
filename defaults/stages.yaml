@@ -1,4 +1,4 @@
-# The shipped method: the 7 stages from "RFP Analysis Instructions — BMC Helix Presales (Staged Workflow)".
+# The shipped method: 7 stages, a gate after each, as used on real tenders.
 # Change any of this in your personal profile (~/.bidforge/profile/*.yaml) or a deal's bid.yaml
 # (under `overrides:`), never here: upgrades replace this file.
 #

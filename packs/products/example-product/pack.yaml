@@ -1,0 +1,125 @@
+# A product pack skeleton — copy this folder and fill it in.
+#
+# A product pack is the hop between what a buyer asks for and what you sell: it says how their scope
+# divides into your domains, which module covers what, which claims you must not make, and what has to
+# be asked before a price or a licence metric is written down.
+#
+# The engine needs every key below to exist, so nothing here may simply be deleted. Replace the invented
+# module names with your own; keep the shape.
+#
+# IMPORTANT — where your real pack goes. A pack with your employer's or a customer's catalogue in it
+# must never be committed. Put it in ~/.bidforge/local-packs/products/<id>/ instead: BidForge loads that
+# folder exactly like this one, it is outside the repo, and a pack there with the same id replaces the
+# shipped one. `bid packs list` shows a private pack with a `·` marker.
+#
+# Every catalogue entry ships `evidence: ""` and `confirmed: ""` on purpose. The module exists and
+# roughly what it covers is right, but nobody has sourced the claim yet, so any compliance rating resting
+# on it prints **unverified** and the Stage 3 gate will not pass until it is sourced or accepted in
+# writing. That is the mechanism that keeps fixed rule 3 (never invent SKUs, licence metrics or
+# certifications) true regardless of who is filling the pack in.
+
+id: example-product
+label: Example product
+type: product
+version: 0.1
+
+# Lower-case phrases looked for in the RFP's file names, headings and text when suggesting packs.
+# Replace these with the words a buyer would actually use when asking for what you sell.
+signals: [example, itsm, service management, service desk, cmdb]
+
+# How Stage 3 groups scope. `match` words classify a requirement into the domain when the requirement
+# doesn't name a module. Three domains is enough to start; add more as your catalogue grows.
+domains:
+  service_desk:
+    label: Service desk
+    match: [service desk, ticket, incident, request, triage, queue, agent, portal, self-service]
+  operations:
+    label: Operations & observability
+    match: [monitoring, event, alert, telemetry, correlation, automation, orchestration, runbook,
+            cmdb, configuration management database, configuration item, inventory, discovery,
+            reconciliation, asset]
+  platform:
+    label: Platform & integrations
+    match: [integration, API, SSO, authentication, hosting, tenant, availability, upgrade, data residency]
+
+# What each module covers. `covers` is what the classifier matches a requirement against.
+#
+# When you have the source, put it here — a doc path, a past answer, a URL, or an id from
+# ~/.bidforge/evidence/. Or, if you have shown it and are telling BidForge so:
+#     confirmed: "<who>, <YYYY-MM-DD>"
+catalogue:
+  module_service_desk:
+    covers: incident, request, ticket lifecycle, assignment, queues, portal
+    evidence: ""
+    confirmed: ""
+  module_operations:
+    covers: monitoring, event correlation, alerting, automation, orchestration
+    evidence: ""
+    confirmed: ""
+  module_platform:
+    covers: integrations, REST API, SSO, hosting, tenancy, availability
+    evidence: ""
+    confirmed: ""
+  module_reporting:
+    covers: reporting, dashboards, analytics, KPI reporting
+    evidence: ""
+    confirmed: ""
+
+# Binding rules Stage 2 and Stage 4 must apply. These are your scope position, so they override an
+# enthusiastic reading of the RFP. Keep at least one that excludes something — a pack with no rule has
+# nothing to hold the line on. The two below are generic examples; replace them with your own.
+scope_rules:
+  - id: no-unreleased-commitment
+    text: >
+      Nothing unreleased is a commitment. A requirement that only a future release would meet is rated
+      roadmap dependent, flagged [ROADMAP RISK], and raised as a Confirm item for Product Management
+      with the exact question. It is never rated as complying.
+    applies_to: [solution, compliance]
+  - id: certification-evidence
+    text: >
+      Certifications, accreditations and audit reports are only ever claimed with the certificate or
+      report cited. Otherwise the item is Unknown, with an owner and a Confirm item.
+    applies_to: [security, compliance]
+  # A rule can also name words the solution must not use about the product. `forbid` is matched against
+  # the proposed modules and the architecture outline; `allow_with` lists the mitigations that make the
+  # claim legitimate (a partner delivering it, say). This one is an example: replace the words with
+  # whatever your product genuinely does not do, and delete the rule if nothing qualifies.
+  - id: no-adjacent-market-claim
+    text: >
+      Everything outside the product's own market is somebody else's. Say so plainly, route it to a
+      partner or an integration, and raise the question of who supplies that layer.
+    applies_to: [solution, compliance]
+    forbid: [telemetry from plant, operational technology, scada, plc, building management, dcim]
+    allow_with: [partner, integration]
+
+# What Stage 4 has to collect — questions, never answers. Licence metric and price are the deal team's
+# to give; BidForge does not guess either, and a blank is better than an invented number.
+licensing_inputs:
+  - key: licensing_model
+    ask: Which licensing model applies (named user, concurrent, tiered, subscription bundle), and which document defines it?
+  - key: licence_metric_per_module
+    ask: For each module in the proposed scope, what is the licence metric and the count basis?
+  - key: quantity_basis
+    ask: What drives the quantity (employees, IT staff, managed devices, tickets, tenants)?
+  - key: support_tier
+    ask: Which support tier is being proposed, and what response times does it commit to?
+
+sizing_inputs:
+  - key: user_population
+    ask: How many end users, IT agents and approvers — and how many concurrent?
+  - key: ticket_volume
+    ask: Ticket volume per month, split by channel and by domain?
+  - key: integration_count
+    ask: How many integrations, and which systems?
+  - key: availability_target
+    ask: Availability and DR target the buyer expects, and whether it is contractual?
+
+services_inputs:
+  - key: implementation_scope
+    ask: Which modules are configured, and which are out of the implementation scope?
+  - key: data_migration
+    ask: What data is migrated — open tickets, history, CMDB, knowledge — and who cleans it?
+  - key: training
+    ask: Who is trained, how many groups, and is documentation in scope?
+  - key: partner_split
+    ask: If a partner delivers, what is the split of responsibility and who is prime?

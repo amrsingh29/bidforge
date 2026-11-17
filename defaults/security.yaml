@@ -1,0 +1,57 @@
+# Stage 5 — Security, compliance & legal. Change any of it in your profile or a deal's overrides.
+
+security:
+  # What Security has to answer, whatever the RFP says. Each becomes a row with an owner and a deadline.
+  standing_items:
+    - {key: data_residency, label: Data residency & cross-border transfer}
+    - {key: access_control, label: Authentication, SSO, privileged access}
+    - {key: encryption, label: Encryption in transit and at rest, key management}
+    - {key: audit_logging, label: Audit logging and retention}
+    - {key: certification_evidence, label: Certifications (ISO 27001, SOC 2, local accreditation)}
+    - {key: penetration_test, label: Penetration testing and remediation evidence}
+    - {key: vulnerability, label: Vulnerability management and patch cadence}
+    - {key: bcp_dr, label: Business continuity, DR and tested RTO/RPO}
+    - {key: incident_notification, label: Security incident notification and breach reporting}
+    - {key: subcontractors, label: Sub-contractors and data processing agreements}
+    - {key: audit_rights, label: Buyer's audit and regulator access rights}
+    - {key: exit, label: Data extraction, exit assistance and deletion on termination}
+
+  # AI-specific checks. Applied when the RFP, or the proposed solution, involves AI, ML, a virtual agent,
+  # automation that decides, or analytics that profile. The region packs can add more.
+  ai_checks:
+    - Where is the model trained, and does customer data train it?
+    - Is any personal data used in prompts, and how long is it retained?
+    - Can the buyer opt out of model training and data sharing?
+    - Is the output explainable, and is a human in the loop for decisions that affect people?
+    - Which regulations apply to automated decisions in the buyer's sector?
+    - Is there a documented model-change and re-validation process?
+    - Where does inference run — which region, and under which sub-processors?
+
+  # How a legal clause is rated. `risk: high` clauses are what Legal spends time on first.
+  clause_risks:
+    low:      {label: Market standard, risk: low}
+    medium:   {label: Acceptable with a change, risk: medium}
+    high:     {label: Unacceptable as written, risk: high}
+    unknown:  {label: Not reviewed, risk: high}
+
+  # Clauses to look for in every term sheet, contract or RFP. Missing ones are findings too.
+  clause_watch:
+    - {key: liability, label: Limitation of liability and the cap}
+    - {key: indemnity, label: Indemnities, including IP and data breach}
+    - {key: sla_credits, label: Service credits and remedies}
+    - {key: termination, label: Termination for convenience and its consequences}
+    - {key: ip_ownership, label: IP ownership, including customer-specific configuration}
+    - {key: payment_terms, label: Payment terms, milestones and retention}
+    - {key: variation, label: Change control and price variation}
+    - {key: confidentiality, label: Confidentiality and its duration}
+    - {key: data_protection, label: Data protection terms and breach notification window}
+    - {key: audit, label: Audit rights and regulatory access}
+    - {key: governing_law, label: Governing law, venue and dispute resolution}
+    - {key: insurance, label: Insurance requirements and limits}
+    - {key: flow_down, label: Flow-down of obligations to sub-contractors}
+    - {key: benchmarking, label: Benchmarking and price-review clauses}
+
+  # A security or legal item is only handed over properly with an owner and a date.
+  handover:
+    require_owner: true
+    require_due_date: true

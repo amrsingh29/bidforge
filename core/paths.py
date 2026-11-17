@@ -12,3 +12,8 @@ LOCAL_DEALS = ROOT / "deals"
 HOME = Path(os.environ.get("BIDFORGE_HOME", "~/.bidforge")).expanduser()
 SETTINGS = HOME / "settings.json"
 PROFILE = HOME / "profile"
+
+# Packs that must never be published: your employer's product catalogue, a customer's own product, a
+# partner's. They live here, outside the repo, and are loaded exactly like the shipped packs. A pack of
+# the same id in here wins, so a private pack can also override a shipped one.
+LOCAL_PACKS = HOME / "local-packs"

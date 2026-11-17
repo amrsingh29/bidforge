@@ -1,0 +1,43 @@
+# Stage 3 — Scope & requirements: how a requirement is rated against what we can actually show.
+# Change any of it in your profile or a deal's overrides.
+
+compliance:
+  # The rating levels. `label` is what prints in the matrix; `counts_as` decides whether it counts as
+  # covered (used for the "fit at a glance" percentage). Add your own as new keys.
+  # Where a level implies we can't meet it today, set `gap: true` — Stage 4 then needs a mitigation.
+  levels:
+    complies:          {label: Complies OOTB, counts_as: covered,
+                        note: the product does this today, with evidence}
+    complies_config:   {label: Complies with configuration, counts_as: covered,
+                        note: no development, but implementation work}
+    complies_partner:  {label: Complies through partner, counts_as: covered,
+                        note: delivered by a partner, not by us}
+    partial:           {label: Partial, counts_as: partial, gap: true,
+                        note: some of it is met; say which part fails}
+    roadmap:           {label: Roadmap dependent, counts_as: gap, gap: true,
+                        note: needs something not generally available — confirm with Product Management}
+    non_compliant:     {label: Non-compliant, counts_as: gap, gap: true,
+                        note: we can't meet it as written}
+    not_applicable:    {label: Not applicable, counts_as: none,
+                        note: the requirement doesn't apply to the proposed scope — give the reason}
+    unassessed:        {label: Unassessed, counts_as: none,
+                        note: not rated yet (a matrix can be saved incomplete only as a draft)}
+
+  # A rating with none of these is printed as **unverified**.
+  evidence_kinds:
+    library:       Past answer or product documentation from the evidence library
+    confirmation:  The user confirmed it (recorded with the deal)
+    pack:          A sourced entry in the product pack catalogue
+    demo:          Seen working in a demo or POC — name the date
+    reference:     A reference customer or published case study
+
+  # Requirement types that go into the NFR table of the matrix (Stage 3.3).
+  nfr_types: [non_functional, security, integration]
+
+  # Which product pack domain a requirement falls into when nothing else matches.
+  fallback_domain: unassigned
+
+  # Stage 3 works through the requirements a domain at a time. Batches bigger than this are split so a
+  # single save stays reviewable.
+  batch:
+    max_requirements: 120

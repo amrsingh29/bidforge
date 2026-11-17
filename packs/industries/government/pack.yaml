@@ -1,0 +1,28 @@
+# Government / public sector industry pack.
+
+id: government
+label: Government & public sector
+type: industry
+version: 0.1
+signals: [government, ministry, public sector, whole-of-government, statutory board, municipal, gcc]
+
+checks:
+  regulations:
+    - name: Public-sector security accreditation
+      owner: security
+      raises: Any government buyer
+      ask: Which accreditation or classification must the service hold, and is it a precondition of award?
+      source: National public-sector security accreditation scheme
+    - name: Local-entity and local-content rules
+      owner: legal
+      raises: Government procurement, or a scored local-content criterion
+      ask: Is a local entity, local partner or local-content commitment required or scored?
+      source: Public procurement rules
+
+  typical:
+    - text: Accessibility (WCAG) is usually mandatory and tested, not aspirational
+    - text: Data sovereignty is a condition of award, not a preference
+    - text: Open standards and exit/interoperability obligations are commonly imposed
+    - text: Local support hours and an in-country presence are scored
+    - text: Security clearance or screening for support staff may be required
+    - text: Liquidated damages and performance bonds are standard

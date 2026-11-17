@@ -2,6 +2,7 @@
 #
 # Collections take new keys (adding a stage or a role); anywhere else a key that isn't in the
 # defaults is reported by `bid config check` as an unknown ID (usually a typo).
-collections: [stages, roles, modes, requirements.types, qualification.scorecard, qualification.capture]
+collections: [stages, roles, modes, requirements.types, qualification.scorecard, qualification.capture,
+              compliance.levels, compliance.evidence_kinds, solution.mitigations, security.clause_risks]
 # Keys allowed on anything, even where they aren't in the defaults (the "turn off" action)
 always_allowed: [enabled]

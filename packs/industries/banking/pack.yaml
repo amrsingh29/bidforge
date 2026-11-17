@@ -1,0 +1,30 @@
+# Banking industry pack. Themes to look for, and the checks a bank buyer will apply.
+# Nothing here is a requirement: an industry theme only becomes one when a REQ cites it.
+
+id: banking
+label: Banking & financial services
+type: industry
+version: 0.1
+signals: [bank, banking, financial services, insurer, insurance, capital markets, mas trm, bnm rmit, pci dss, core banking]
+
+checks:
+  regulations:
+    - name: PCI DSS
+      owner: security
+      raises: Cardholder data is in scope, or the RFP names PCI
+      ask: Is cardholder data processed or stored, and is a PCI attestation of compliance required from the provider?
+      source: PCI Security Standards Council
+    - name: Outsourcing and material-service-provider rules
+      owner: legal
+      raises: A regulated institution outsourcing a material service
+      ask: Does the contract need regulatory access, exit assistance and sub-contractor approval terms?
+      source: Local regulator outsourcing guidance
+
+  typical:
+    - text: Segregation of duties and full audit trail on change and access are usually mandatory
+    - text: Availability is contractual with service credits, not just a target
+    - text: DR is tested annually and evidence of the test is requested
+    - text: Privileged access management and just-in-time access are standard asks
+    - text: Regulator access to the provider and to audit reports is typically non-negotiable
+    - text: Data residency and cross-border transfer are questioned in detail
+    - text: Change windows are tight and often tied to core-banking blackout periods

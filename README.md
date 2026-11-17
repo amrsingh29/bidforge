@@ -4,8 +4,9 @@ Reads an RFP pack and runs a staged bid analysis, with gates where it stops for 
 inventory and key dates, bid/no-bid, compliance matrix, solution and licensing inputs, security
 and legal, RACI, risks, clarifications and a win plan. It works in Claude Code and OpenCode.
 
-**Status:** Phase 0 (scaffold) done. Deals, status, team, configuration layers and both hosts
-work; the stages are built from Phase 1 onwards (see [PLAN.md](PLAN.md)).
+**Status:** Phases 0–1 done, plus Stages 2–5 of Phase 2 onward: deals, status, team, configuration
+layers, both hosts, intake and extraction, the coverage and spot-check gates, Stages 1–5, packs and
+evidence lookup. Stages 6–7 and export are next (see [PLAN.md](PLAN.md)).
 
 ## Install
 
@@ -29,6 +30,9 @@ step, stopping at hard gates. Start a deal with `/bid new`, check progress with 
 | `bid team presales=NAME sales=NAME` | Name the people on this bid |
 | `bid list` · `bid use <deal>` | Known deals; switch the current one |
 | `bid config show [ID]` · `bid config check` | Effective configuration and where each value came from; validation |
+| `bid packs list` · `suggest` · `use` · `show` · `check` | The domain knowledge a deal uses: product, region, industry |
+| `bid evidence list` · `find` · `record` | What we can actually show for a claim, and the confirmations behind it |
+| `bid stage3 matrix` · `bid stage4 inputs` | Where the compliance matrix and the pricing inputs stand |
 | `bid doctor` · `bid selftest` | Install checks |
 
 ## Where things live

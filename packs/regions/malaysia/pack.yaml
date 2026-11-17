@@ -1,0 +1,35 @@
+# Malaysia region pack.
+
+id: malaysia
+label: Malaysia
+type: region
+version: 0.1
+signals: [malaysia, malaysian, kuala lumpur, bnm, bank negara, pdpa, mdec, mydigital, crmsd, gdpr-ai]
+
+checks:
+  regulations:
+    - name: Bank Negara Malaysia RMiT (Risk Management in Technology)
+      owner: security
+      raises: A BNM-regulated financial institution, or the RFP names RMiT
+      ask: Does the RFP require RMiT alignment, a technology risk assessment, or specific cyber-resilience evidence?
+      source: Bank Negara Malaysia, Risk Management in Technology policy document
+    - name: Personal Data Protection Act 2010 (Malaysia)
+      owner: legal
+      raises: Personal data of Malaysian residents is processed
+      ask: Does the RFP require PDPA compliance, a data protection notice, or cross-border transfer consent?
+      source: Personal Data Protection Act 2010 (Malaysia)
+    - name: Data residency and cloud-service conditions
+      owner: security
+      raises: A regulated or public-sector buyer asking where the data sits
+      ask: Must data stay in Malaysia, and is there a required certification or government cloud arrangement?
+      source: National data-residency expectations for regulated sectors
+    - name: MAMPU / public-sector ICT guidelines
+      owner: security
+      raises: Government or GLC buyer
+      ask: Do public-sector procurement, security-accreditation or local-entity rules apply to this award?
+      source: MAMPU public-sector ICT guidance
+
+  typical:
+    - text: Local partner or local-entity participation is commonly scored, not just permitted
+    - text: Government buyers frequently require a local support presence with defined hours
+    - text: Cross-border data transfer needs explicit consent or a safeguard, and buyers ask to see it

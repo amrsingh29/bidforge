@@ -452,7 +452,10 @@ def cmd_packs(a):
         config, _ = layers.effective(deal)
         found = P.suggest(deal, config)
         if not found:
-            print("nothing in this pack's words matched a pack's signals (bid packs list, then bid packs use <id>)")
+            print("No pack matched this RFP's wording — that is normal for a short or unusual pack; "
+                  "the signals are only hints.\nChoose one yourself:\n"
+                  + "\n".join(f"  {pid:20} {p['type']:9} {p['label']}" for pid, p in sorted(P.available().items()))
+                  + "\nThen: bid packs use <id> [<id> ...]   (a product pack plus your region is the usual start)")
         for pid, why in found:
             print(f"  {pid:22} {P.available()[pid]['label']:32} matched: {why}")
         return
@@ -696,7 +699,9 @@ def cmd_doctor(a):
         ok &= good
         print(f"  {'✓' if good else '✗'} {msg}" + (f"  ({fix})" if fix and not good else ""))
 
-    line(sys.version_info >= (3, 10), f"Python {sys.version.split()[0]}", "needs 3.10+")
+    # 3.9 is the real floor: no PEP 604 unions or 3.10-only syntax anywhere in the code, and the full
+    # test suite passes on 3.9.6. Claiming 3.10 was wrong and put first-time users off for no reason.
+    line(sys.version_info >= (3, 9), f"Python {sys.version.split()[0]}", "needs 3.9+")
     try:
         import yaml
         line(True, f"PyYAML {yaml.__version__}")

@@ -50,3 +50,16 @@ stages:
   stage7: {enabled: false}                                # turn off
   partner_check: {name: Partner assessment, gate: soft, after: stage2}   # add
 ```
+
+- **Your product knowledge:** `~/.bidforge/local-packs/` holds a product pack with a real catalogue
+  in it. It is outside the repo on purpose: an employer's or a customer's catalogue is commercial
+  position, and this folder is not. It loads exactly like the shipped packs and outranks one with the
+  same id.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).
+
+The region and industry packs name public regulations and common market practice. They are a prompt
+to check something, not legal advice: a regulation listed there only matters once a real clause raises
+it, and the clause is what you cite.

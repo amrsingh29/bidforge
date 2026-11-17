@@ -19,11 +19,20 @@
   bid stage1 brief | save FILE.json  Stage 1 inventory, dates, submission rules, summary
   bid capture [KEY="answer" ...]     what the pack can't tell us (relationship, competitors…); KEY= clears
   bid stage2 brief | save FILE.json  Stage 2 qualification: context, pass/fail items, scorecard, decision
+  bid packs list | show ID | suggest | use ID... | add | remove | check
+                                     the domain knowledge a deal reads (product, region, industry)
+  bid evidence list | find "topic" | record KEY="what was confirmed"
+                                     what we can actually show for a claim
+  bid stage3 brief [--domain D] | save FILE.json | matrix | render
+                                     Stage 3: scope, then the compliance matrix one domain at a time
+  bid stage4 brief | save FILE.json | inputs    Stage 4: solution, gap mitigations, licensing inputs
+  bid stage5 brief | save FILE.json  Stage 5: security, regulations, AI checks, clause risk table
   bid gate pass STAGE [--note "..."] record that you passed a hard gate (only on your say-so)
-  bid doctor                         check the install
+  bid doctor                         check the install, and which hosts have /bid
   bid selftest                       run the self-test in a throwaway home and workspace
 
-Settings and your personal profile live in ~/.bidforge (BIDFORGE_HOME overrides).
+Settings, your personal profile and your private packs live in ~/.bidforge (BIDFORGE_HOME overrides).
+Documentation: https://github.com/amrsingh29/bidforge/tree/main/docs
 """
 import argparse, datetime as dt, json, os, subprocess, sys
 from pathlib import Path

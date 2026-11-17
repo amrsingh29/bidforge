@@ -3,7 +3,7 @@
 > Use BidForge in Hermes Agent. About 5 minutes, once.
 
 **Before you start:** Hermes installed and run once (so `~/.hermes/config.yaml` exists), and
-Python 3.9+.
+Python 3.9+ ([full prerequisites](install.md)).
 
 ## 1. Install
 

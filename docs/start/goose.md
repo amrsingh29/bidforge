@@ -2,7 +2,7 @@
 
 > Use BidForge in Goose, terminal or desktop. About 5 minutes, once.
 
-**Before you start:** Goose installed and run once (so `~/.config/goose` exists), and Python 3.9+.
+**Before you start:** Goose installed and run once (so `~/.config/goose` exists), and Python 3.9+ ([full prerequisites](install.md)).
 
 ## 1. Install
 

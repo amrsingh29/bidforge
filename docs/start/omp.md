@@ -2,7 +2,7 @@
 
 > Use BidForge in omp (oh-my-pi). About 5 minutes, once.
 
-**Before you start:** omp installed and run once (so `~/.omp/agent` exists), and Python 3.9+.
+**Before you start:** omp installed and run once (so `~/.omp/agent` exists), and Python 3.9+ ([full prerequisites](install.md)).
 
 ## 1. Install
 

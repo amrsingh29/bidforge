@@ -3,7 +3,7 @@
 > Use BidForge in Open Worker. About 5 minutes, once.
 
 **Before you start:** Open Worker installed and opened once (so `~/.config/coworker` exists), and
-Python 3.9+.
+Python 3.9+ ([full prerequisites](install.md)).
 
 ## 1. Install
 

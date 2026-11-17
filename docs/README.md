@@ -1,18 +1,27 @@
 # BidForge docs
 
+A presales tool that reads an RFP pack and runs a staged bid analysis, stopping at gates where a human
+decides. Five of seven stages are built. It does not write your RFP answers.
+
 ## Start here
 
-Install once, then pick the agent you use:
+New to it? Read in this order — about 20 minutes in total.
 
-```bash
-git clone https://github.com/amrsingh29/bidforge.git ~/Developer/bidforge
-bash ~/Developer/bidforge/hosts/install-all.sh
-```
+| | Read | Why |
+|---|---|---|
+| 1 | [Install and set up](start/install.md) | Prerequisites, the installer, and the one question only you can answer |
+| 2 | [Concepts](understand/concepts.md) | Six words: deal, requirement, obligation, domain, label, gate |
+| 3 | [How it works](understand/how-it-works.md) | The three-way split, and what the code refuses |
+| 4 | Your agent's guide (below) | The commands you'll actually type |
 
-`install-all.sh` finds every supported AI tool on your machine and registers BidForge in each,
-skipping the ones you don't have. Then `/bid-setup` in that tool.
+Then: `/bid-setup`, then `/bid new`, then `/bid`.
 
-| Your agent | Guide | You type |
+## Supported agents
+
+One engine, one workflow file, six hosts. `hosts/install-all.sh` detects which you have and registers
+BidForge in each.
+
+| Agent | Guide | You type |
 |---|---|---|
 | Claude Code | [claude-code.md](start/claude-code.md) | `/bid` |
 | OpenCode | [opencode.md](start/opencode.md) | `/bid` |
@@ -21,21 +30,38 @@ skipping the ones you don't have. Then `/bid-setup` in that tool.
 | Open Worker | [openworker.md](start/openworker.md) | "run BidForge" |
 | Goose | [goose.md](start/goose.md) | `goose run --recipe bid -s` |
 
-No agent? The CLI works on its own: `~/.bidforge/bin/bid --help`.
+No agent? The CLI works on its own — [CLI reference](reference/cli.md).
+
+Claude Code is opt-in (`--with-claude`) because the RFP text it reads goes to Anthropic rather than
+your own provider. On an NDA pack that is a decision, not a default.
 
 ## Understand it
 
-- [AI hosts](understand/ai-hosts.md) — one engine, six adapters, and why each host is wired the way it is
-- [PLAN.md](../PLAN.md) — the design, the stages, and what is built so far
-- [Fixed rules](../skills/bid/references/rules.md) — the ten rules every stage obeys
+- **[Concepts](understand/concepts.md)** — the vocabulary, and why each word exists
+- **[How it works](understand/how-it-works.md)** — the flow, and the things the code refuses
+- **[The stages](understand/stages.md)** — what each stage asks, produces, and gates on
+- **[Architecture](understand/architecture.md)** — layers, modules, configuration, packs, evidence
+- **[AI hosts](understand/ai-hosts.md)** — how six agents share one engine, and how to add a seventh
+
+## Reference
+
+- **[CLI](reference/cli.md)** — every command, exit codes, environment variables
+- **[Configuration](reference/configuration.md)** — the three layers, the four actions, every default key
+
+## Guides
+
+- **[Write a product pack](guides/packs.md)** — the highest-value thing you can add, and why unsourced
+  entries stay empty
+
+## Other
+
+- **[FAQ](faq.md)** — including "why did it refuse to save?" and "is my RFP sent anywhere?"
+- **[PLAN.md](../PLAN.md)** — the original design and build plan
+- **[Fixed rules](../skills/bid/references/rules.md)** — the ten rules enforced in code
 
 ## The one thing to know
 
-BidForge splits the work deliberately:
-
-- **You** start the deal, answer gate questions, and decide bid or no-bid.
-- **The agent** reads the RFP, writes the extraction and the ratings, and drafts each stage.
-- **The code** checks everything the agent writes, computes the scores, and refuses anything untrue.
-
-That last part is why the tool is worth using: a date the source doesn't say, a module that isn't in
-the pack, a rating resting on nothing — each is refused at save time, not left for review.
+BidForge splits work three ways: you decide, the agent reads, the code checks. A model cannot police
+itself — so a date the source doesn't contain, a module that isn't in the pack, or a rating resting on
+nothing is refused at save time. That guard rail is why the tool is worth using, and it's why most of
+the test suite asserts that something gets **rejected**.

@@ -3,7 +3,7 @@
 > Use BidForge in OpenCode. About 5 minutes, once.
 
 **Before you start:** OpenCode installed and run once (so `~/.config/opencode` exists), and
-Python 3.9+.
+Python 3.9+ ([full prerequisites](install.md)).
 
 ## 1. Install
 

@@ -2,7 +2,8 @@
 
 > Use BidForge in Claude Code. About 5 minutes, once.
 
-**Before you start:** Claude Code installed and working, and Python 3.9+ (`python3 --version`).
+**Before you start:** Claude Code installed and working, and Python 3.9+ — see
+[full prerequisites](install.md).
 
 > **Privacy:** with Claude Code the RFP text your skill reads goes to Anthropic. If the pack is under
 > NDA, check that is allowed before you point it at a real bid.

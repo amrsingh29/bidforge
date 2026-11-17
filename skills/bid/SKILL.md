@@ -23,7 +23,7 @@ Paths (identical in every agent; set up by `hosts/install-all.sh`):
 | `/bid fast-track` · `quick-look` · `run to stage N` · `step` | Run that mode (`bid config show modes`) |
 | `/bid team` · "Alex is the AE" | `bid team role=person ...` (roles: `bid config show roles`) |
 | `/bid config` · "I want stage 7 off" | `bid config show [ID]`; changes go in a file in `~/.bidforge/profile/` (personal) or the deal's `bid.yaml` under `overrides:` (this RFP only); then `bid config check` |
-| `/bid list` · "switch to the UOB bid" | `bid list`, `bid use <deal>` |
+| `/bid list` · "switch to the Acme Bank bid" | `bid list`, `bid use <deal>` |
 | `/bid export` · `one-pager` | Run it if built |
 | `/bid packs` · "use the product pack" | `bid packs suggest`, then `bid packs use <id> …`; `bid packs show <id>` |
 | "Alex confirmed we do X" | `bid evidence record KEY="what was confirmed"`, cited as `confirm:KEY` |

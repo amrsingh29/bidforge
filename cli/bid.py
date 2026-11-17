@@ -706,13 +706,45 @@ def cmd_doctor(a):
         import yaml
         line(True, f"PyYAML {yaml.__version__}")
     except ImportError:
-        line(False, "PyYAML", "re-run core/hosts/install.sh")
+        line(False, "PyYAML", "run: bash hosts/install-all.sh")
     w = ws.workspace()
     line(w is None or w.is_dir(), f"workspace: {w or 'not set (deals go to BidForge deals/)'}", "bid config --workspace PATH")
-    claude = Path.home() / ".claude/skills/bid"
-    line(claude.exists(), "Claude Code skill /bid", "re-run core/hosts/install.sh")
-    oc = Path(os.environ.get("OPENCODE_CONFIG_DIR", Path.home() / ".config/opencode")) / "commands/bid.md"
-    line(oc.exists(), "OpenCode command /bid", "re-run core/hosts/install.sh")
+
+    # Hosts: report the ones installed and the ones still missing, rather than only the two we used
+    # to support. A host whose settings folder doesn't exist isn't a failure — you just don't use it.
+    env = os.environ
+    home = Path.home()
+    hosts = [
+        ("Claude Code", Path(env.get("CLAUDE_CONFIG_DIR") or home / ".claude"),
+         ["skills/bid/SKILL.md"], True),
+        ("OpenCode", Path(env.get("OPENCODE_CONFIG_DIR") or home / ".config/opencode"),
+         ["commands/bid.md"], True),
+        ("Hermes", Path(env.get("HERMES_HOME") or home / ".hermes"),
+         ["skills/bid/SKILL.md"], True),
+        ("Goose", Path(env.get("GOOSE_CONFIG_DIR") or home / ".config/goose"),
+         ["recipes/bid.yaml"], True),
+        ("omp", Path(env.get("OMP_AGENT_DIR") or home / ".omp/agent"),
+         ["commands/bid.md"], True),
+        ("Open Worker", Path(env.get("COWORKER_HOME") or home / ".config/coworker"),
+         ["skills/bid/SKILL.md"], True),
+    ]
+    installed, absent = [], []
+    for name, base, rels, _ in hosts:
+        present = base.is_dir()
+        ready = present and all((base / r).exists() for r in rels)
+        if ready:
+            installed.append(name)
+        elif present:
+            absent.append(name)          # the tool is here but BidForge isn't registered in it
+    if installed:
+        line(True, "hosts with /bid: " + ", ".join(installed))
+    if absent:
+        line(False, "installed but missing /bid: " + ", ".join(absent), "bash hosts/install-all.sh")
+    if not installed and not absent:
+        line(False, "no supported AI host found", "install one (Claude Code, OpenCode, Hermes, Goose, omp or Open Worker)")
+    plugins = P.available()
+    private = [p for p in plugins.values() if p.get("private")]
+    line(True, f"packs: {len(plugins)} installed" + (f", {len(private)} private" if private else ""))
     problems = layers.check()
     line(not problems, "configuration (defaults + personal profile)", "bid config check")
     sys.exit(0 if ok else 1)

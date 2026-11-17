@@ -1,5 +1,7 @@
 {
   "title": "BidForge",
   "description": "BidForge - staged RFP analysis: start a deal, status, stages with gates, team, configuration",
-  "opencode_prompt": "Run BidForge"
+  "opencode_prompt": "Run BidForge",
+  "goose_title": "BidForge",
+  "parameters": []
 }

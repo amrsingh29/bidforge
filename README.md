@@ -2,26 +2,42 @@
 
 Reads an RFP pack and runs a staged bid analysis, with gates where it stops for your decisions:
 inventory and key dates, bid/no-bid, compliance matrix, solution and licensing inputs, security
-and legal, RACI, risks, clarifications and a win plan. It works in Claude Code and OpenCode.
+and legal, RACI, risks, clarifications and a win plan.
 
 **Status:** Phases 0–1 done, plus Stages 2–5 of Phase 2 onward: deals, status, team, configuration
-layers, both hosts, intake and extraction, the coverage and spot-check gates, Stages 1–5, packs and
+layers, six AI hosts, intake and extraction, the coverage and spot-check gates, Stages 1–5, packs and
 evidence lookup. Stages 6–7 and export are next (see [PLAN.md](PLAN.md)).
 
 ## Install
 
 ```bash
-~/Developer/projects/bidforge/core/hosts/install.sh
+git clone https://github.com/amrsingh29/bidforge.git ~/Developer/bidforge
+bash ~/Developer/bidforge/hosts/install-all.sh
 ```
 
-It creates `.venv`, installs `~/.bidforge/bin/bid`, links the `/bid` skill into Claude Code,
-generates the OpenCode `/bid` command, asks where you keep customer folders, and runs a self-test.
-Re-run it after changing `skills/*/host.json`.
+One engine, one workflow file, six hosts. `install-all.sh` detects which AI tools you have and
+registers BidForge in each, skipping the rest:
+
+| Host | You type | How it drives BidForge |
+|---|---|---|
+| Claude Code | `/bid` | skill → CLI |
+| OpenCode | `/bid` | command → CLI |
+| Hermes | `/bid` | skill → CLI |
+| omp | `/bid` | command → CLI |
+| Open Worker | "run BidForge" | skill → CLI |
+| Goose | `goose run --recipe bid -s` | recipe → CLI |
+
+Claude Code is **opt-in** (`--with-claude`): the RFP text it reads goes to Anthropic rather than your
+own provider. With NDA packs that is a decision, not a default. Every host reaches the same engine
+through `~/.bidforge/bin/bid`, so behaviour is identical wherever you run it.
+
+The installer builds the engine once, puts `bid` on a stable path, registers each host, and runs
+`bid doctor`. Re-run it after pulling a new version.
 
 ## Use it
 
-Type `/bid` in Claude Code or OpenCode. It reads where the current deal stands and runs the next
-step, stopping at hard gates. Start a deal with `/bid new`, check progress with `/bid status`.
+`/bid` reads where the current deal stands and runs the next step, stopping at hard gates. Start a
+deal with `/bid new`, set your folders and packs with `/bid-setup`, check progress with `/bid status`.
 
 | CLI | Does |
 |---|---|

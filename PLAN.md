@@ -28,7 +28,7 @@ It does **not** draft the RFP answers in v1. Drafting comes later, once an answe
    git-ignored. RFP packs are usually under NDA.
 3. **The user's own files are never changed.** BidForge writes only to its own subfolder of the deal.
 4. **Proven on several different RFPs, not one** (see Test set). A phase isn't done until it passes
-   on all of them, in both Claude Code and OpenCode.
+   on all of them, in every supported host.
 
 ## Fixed engine rules (not configurable)
 
@@ -85,7 +85,7 @@ decision) → `/bid` (Stages 3–6, then clarifications approval, then Stage 7 a
 | `/bid one-pager` | The deal one-pager on its own, at any stage |
 | `/bid setup` · `/bid config` | First-time setup; show, check or change your configuration |
 
-Plain words work too ("run stage 3 on volume 2"). All real work goes through the `bid` CLI, so both hosts behave the same.
+Plain words work too ("run stage 3 on volume 2"). All real work goes through the `bid` CLI, so every host behaves the same.
 
 ## The 7 stages (shipped default)
 
@@ -223,7 +223,7 @@ bidforge/
 │   ├── plan/          RACI validation, back-scheduling from the deadline, workload
 │   ├── export/        xlsx workbook, deal one-pager, clarifications
 │   ├── deal/          customer-folder lookup
-│   └── hosts/         installer for Claude Code and OpenCode
+│   └── hosts/         one installer per host + install-all.sh (detects which are installed)
 ├── defaults/          the shipped method: stages/*.md, scorecard, levels, roles, RACI, calendar rules
 ├── packs/             products/example-product · regions/* · industries/*
 ├── skills/bid/        one skill, a stage router, plus shared references
@@ -254,13 +254,13 @@ Each phase ends with a test that must pass before the next starts.
 
 | # | Phase | Builds | Done when |
 |---|---|---|---|
-| 0 | **Scaffold** ✅ | Repo, `bid` CLI, host installer, config layering skeleton, deal folder, `bid doctor` | `/bid status` runs on an empty deal in Claude Code and OpenCode |
+| 0 | **Scaffold** ✅ | Repo, `bid` CLI, host installers, config layering skeleton, deal folder, `bid doctor` | `/bid status` runs on an empty deal in every supported host |
 | 1 | **Intake + Stage 1** | Parsers, two-pass extraction, coverage report, spot-check gate, REQ IDs, inventory, dates, submission rules, summary | Test-set packs 1 and 2 meet the extraction pass criteria |
 | 2 | **State + Stage 2 + fast-track** | U/C registers, `status`, `redo` with versions, scorecard, gates, capture inputs, fast-track | A fresh session picks up exactly where the last one stopped; the bid/no-bid recommendation matches a human's judgement or the differences are explained |
 | 3 | **Packs + Stages 3–5** | Product pack skeleton, Singapore/Malaysia and banking/government packs, evidence lookup, compliance matrix, solution, licensing and services inputs, security/legal | Compliance ratings compared with a real matrix; no scope-rule over-claims; every rating cites evidence or says unverified |
 | 4 | **Stages 6–7 + export + addenda** | Roles and people, RACI validation, back-scheduled calendar, risks, clarifications, win themes, work plan, xlsx workbook, deal one-pager, addendum diff | A full deal run produces the workbook and one-pager; a one-pager after Stage 1 shows only Stage 1 sections; an addendum re-run keeps owners and ratings |
 | 5 | **Customisation** | The four actions on stable IDs, custom sections and stages, `config show / check`, upgrade-safe personal profile | A colleague-style profile (different scorecard, an extra stage, a role removed) runs cleanly on test packs 1–3 |
-| 6 | **Release** | Test packs 3 and 4, GETTING-STARTED, installer self-test | All four test packs pass in both hosts |
+| 6 | **Release** | Test packs 3 and 4, GETTING-STARTED, installer self-test | All four test packs pass in every supported host |
 
 **v2, later:** team profiles, a guided `bid config customise` chat, profile import/export,
 `bid-respond` (draft answers from the library, marked DRAFT RESPONSE), Red Team review scoring,

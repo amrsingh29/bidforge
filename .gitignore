@@ -19,3 +19,8 @@ tests/set/
 # second lock, for the case where somebody drops a real catalogue straight into packs/ by habit.
 packs/products/<your-product>/
 packs/local/
+
+# Editable-install build output (pip install -e .)
+*.egg-info/
+build/
+dist/

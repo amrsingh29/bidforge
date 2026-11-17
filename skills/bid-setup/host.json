@@ -1,0 +1,7 @@
+{
+  "title": "BidForge setup",
+  "description": "BidForge - set up or change where deals live, the people on a bid, and the packs it reads",
+  "opencode_prompt": "Run BidForge setup",
+  "goose_title": "BidForge - Setup",
+  "parameters": []
+}

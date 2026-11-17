@@ -1,0 +1,28 @@
+[project]
+name = "bidforge"
+version = "0.1.0"
+description = "Reads an RFP pack and runs a staged bid analysis, stopping at gates for your decisions"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+dependencies = [
+    "PyYAML>=6.0",
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    "pypdf>=5.0",
+]
+
+[project.scripts]
+bid = "cli.bid:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# `defaults/` and `packs/` are data the engine reads at run time. An editable install
+# (pip install -e .) keeps them where they are, which is what every installer does.
+[tool.setuptools.packages.find]
+include = ["core*", "cli*"]
+
+[tool.setuptools.package-data]
+core = ["../defaults/*.yaml"]

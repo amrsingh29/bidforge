@@ -8,7 +8,7 @@ description: BidForge — reads an RFP, RFI, RFQ or tender pack and runs a stage
 BidForge works on one **deal** (one RFP) at a time. Everything it knows about a deal is on disk in
 the deal folder, so always read the state from the CLI, never from memory of an earlier chat.
 
-Paths (same in Claude Code and OpenCode; set up by BidForge's `core/hosts/install.sh`):
+Paths (identical in every agent; set up by `hosts/install-all.sh`):
 - CLI: `~/.bidforge/bin/bid`. Run it with your shell tool.
 - Fixed rules for every stage: `~/.bidforge/skills/bid/references/rules.md` — **read first**
 

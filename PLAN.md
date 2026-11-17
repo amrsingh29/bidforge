@@ -1,6 +1,6 @@
 # BidForge v1: build plan
 
-**Status:** Phase 0 done (2026-10-24); Phase 1 next · **Created:** 2026-10-24 · **Location:** `~/Developer/projects/bidforge`
+**Status:** Phase 0 done; Phase 1 built and run on BW and VADS (open: matrix linking in the product, a second-shape test pack); Stage 2 built (rest of Phase 2 open) · **Created:** 2026-10-24 · **Location:** `~/Developer/projects/bidforge`
 
 BidForge reads an RFP pack and helps a presales lead decide whether to bid, what to propose, who
 does what, and where to focus to win. It works stage by stage, with a gate after each stage where it
